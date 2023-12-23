@@ -1,2 +1,2 @@
 # maze-maverick
-A maze game for BP project
+A maze game for BP project with cpp
