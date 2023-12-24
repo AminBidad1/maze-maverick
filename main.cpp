@@ -7,17 +7,17 @@ using namespace std;
 
 
 void reset_terminal();
-int start();
+int start_menu();
 int getch(void);
 
 
 int main(){
-    start();
+    start_menu();
 }
 
-int start(){
+int start_menu(){
     reset_terminal();
-    int head = 2;
+    int selected_option = 2;
     const string options[12] = {
         "1. Create a New Map",
         "   1.1 Easy",
@@ -35,8 +35,8 @@ int start(){
     while (true)
     {
         for (int i=0; i<12; i++){
-            if (head == i+1){
-                cout << color::rize(options[i], "Blue", "Yellow") << endl;
+            if (selected_option == i+1){
+                cout << color::rize(options[i], "Red", "Blue") << endl;
             }
             else {
                 cout << options[i] << endl;
@@ -45,28 +45,28 @@ int start(){
         switch (getch())
         {
         case 65: 
-            head--; // key up
-            if (head == 4)
-                head = 3;
-            else if (head == 7)
-                head = 6;
+            selected_option--; // key up
+            if (selected_option == 4)
+                selected_option = 3;
+            else if (selected_option == 7)
+                selected_option = 6;
             break;
         case 66: 
-            head++; // key down
-            if (head == 4)
-                head = 5;
-            else if (head == 7)
-                head = 8;
+            selected_option++; // key down
+            if (selected_option == 4)
+                selected_option = 5;
+            else if (selected_option == 7)
+                selected_option = 8;
             break;
         case '\n':
-            return head; // enter key
+            return selected_option; // enter key
         default:
             break;
         }
-        if (head > 12)
-            head = 12;
-        else if (head <= 1)
-            head = 2;
+        if (selected_option > 12)
+            selected_option = 12;
+        else if (selected_option <= 1)
+            selected_option = 2;
         reset_terminal();        
     }
 }
