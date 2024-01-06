@@ -1,4 +1,3 @@
-#include <termios.h>
 #include <unistd.h>
 #include <iostream>
 #include <time.h>
@@ -6,13 +5,23 @@
 
 using namespace std;
 
+#ifdef __MINGW32__
+    #include <conio.h>
+    const int UP_KEY = 72;
+    const int DOWN_KEY = 80;
+#elif defined (__LINUX__) || defined(__gnu_linux__) || defined(__linux__)
+    #include <termios.h>
+    const int UP_KEY = 65;
+    const int DOWN_KEY = 66;
+    int getch(void);
+#endif
+
 struct position {
     int row, col;
 };
 
 void reset_terminal();
 int start_menu();
-int getch(void);
 void create_map(int** table, int rows, int columns);
 int generate_random(int min_value, int max_value, int* ignored_numbers, int size);
 bool isin(int list[], int number, int size);
@@ -81,14 +90,14 @@ int start_menu(){
         }
         switch (getch())
         {
-        case 65:
+        case UP_KEY:
             selected_option--; // key up
             if (selected_option == 4)
                 selected_option = 3;
             else if (selected_option == 7)
                 selected_option = 6;
             break;
-        case 66:
+        case DOWN_KEY:
             selected_option++; // key down
             if (selected_option == 4)
                 selected_option = 5;
@@ -234,20 +243,21 @@ void create_map(int** table, int rows, int columns){
     }
 }
 
-
-/* reads from keypress, doesn't echo */
-int getch(void)
-{
-    struct termios oldattr, newattr;
-    int ch;
-    tcgetattr( STDIN_FILENO, &oldattr );
-    newattr = oldattr;
-    newattr.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
-    ch = getchar();
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
-    return ch;
-}
+#if defined (__LINUX__) || defined(__gnu_linux__) || defined(__linux__)
+    /* reads from keypress, doesn't echo */
+    int getch(void)
+    {
+        struct termios oldattr, newattr;
+        int ch;
+        tcgetattr( STDIN_FILENO, &oldattr );
+        newattr = oldattr;
+        newattr.c_lflag &= ~( ICANON | ECHO );
+        tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+        ch = getchar();
+        tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+        return ch;
+    }
+#endif
 
 void reset_terminal(){
     #if defined _WIN32
