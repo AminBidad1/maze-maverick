@@ -90,7 +90,7 @@ void read_UserInfo(string &user_name)
     }
     else
     {
-        cout << "Unable to open the file for writing." << endl;
+        cerr << "Unable to open the file for reading." << endl;
     }
 }
 
@@ -120,7 +120,7 @@ void read_History()
     }
     else
     {
-        cout << "Unable to open the file for writing." << endl;
+        cerr << "Unable to open the file for reading." << endl;
     }
 }
 
