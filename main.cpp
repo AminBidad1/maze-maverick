@@ -2,6 +2,8 @@
 #include <iostream>
 #include <time.h>
 #include "colors.hpp"
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -29,6 +31,8 @@ bool isin(int list[], int number, int size);
 bool isin_position(position positions[], position point, int size);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void test_create_map();
+void read_UserInfo(string &user_name);
+void read_History();
 
 int main()
 {
@@ -64,6 +68,59 @@ void test_create_map()
             cout << table[i][j] << " ";
         }
         cout << endl;
+    }
+}
+
+void read_UserInfo(string &user_name)
+{
+    ifstream infile("./Users/" + user_name + ".txt");
+    string line;
+    if (infile.is_open())
+    {
+        if (getline(infile, line))
+        {
+            cout << "Total number of games: " << line << endl;
+            getline(infile, line);
+            cout << "Total number of wins: " << line << endl;
+            getline(infile, line);
+            cout << "Date of last win: " << line << endl;
+            getline(infile, line);
+            cout << "Total time of games: " << line << endl;
+        }
+    }
+    else
+    {
+        cout << "Unable to open the file for writing." << endl;
+    }
+}
+
+void read_History()
+{
+    ifstream infile("./Stats/History.txt");
+    string line;
+    if (infile.is_open())
+    {
+        for (int i = 1; i < 11; i++)
+        {
+            if (getline(infile, line))
+            {
+                cout << "Game " << i << ":\n";
+                cout << "Date: " << line << endl;
+                getline(infile, line);
+                cout << "User: " << line << endl;
+                getline(infile, line);
+                cout << "Map name: " << line << endl;
+                getline(infile, line);
+                cout << "Time spent: " << line << endl;
+                getline(infile, line);
+                cout << "Result: " << line << endl
+                     << endl;
+            }
+        }
+    }
+    else
+    {
+        cout << "Unable to open the file for writing." << endl;
     }
 }
 
