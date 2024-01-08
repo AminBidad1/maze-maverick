@@ -26,12 +26,15 @@ struct position
 void reset_terminal();
 int start_menu();
 void create_map(int **table, int rows, int columns);
+bool create_map(int **table, int rows, int columns, int path_length,
+                int max_value, int min_value, int max_block, int min_block);
 int generate_random(int min_value, int max_value, int *ignored_numbers, int size);
 bool isin(int list[], int number, int size);
 bool isin_position(position positions[], position point, int size);
 bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void test_create_map();
+void test_hard_create_map();
 void read_UserInfo(string &user_name);
 void read_History();
 bool isSafePosition(int i, int j, int** table, int rows, int columns);
@@ -40,6 +43,28 @@ bool isaPath(int** table, int i, int j, bool** visited,int rows, int columns,
 vector<position> findPath(int** table, int rows, int columns, int path_length);
 void show_table(int **table, int rows, int columns, vector<position> path,
                 position user_index);
+bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
+                  vector<position>& path, int path_length);
+
+
+template <typename T> 
+void swap(T* a, T* b)
+{
+    T temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+template <typename T>
+void shuffle_array(T inputs[], int count)
+{
+    int random_number;
+    for (int i=count-1; i>0; i--)
+    {
+        random_number = rand() % (i + 1);
+        swap(inputs[i], inputs[random_number]);
+    }
+}
 
 
 int main()
@@ -49,6 +74,10 @@ int main()
     if (selected_option == 2)
     {
         test_create_map();
+    }
+    else if (selected_option == 3)
+    {
+        test_hard_create_map();
     }
     return 0;
 }
@@ -70,6 +99,47 @@ void test_create_map()
     }
     create_map(table, rows, columns);
     vector<position> path = findPath(table, rows, columns, rows + columns - 2);
+    position user_index;
+    show_table(table, rows, columns, path, user_index);
+    if (path.empty())
+    {
+        cout << "Path does not exist!" << endl;
+    }
+    delete[] table;
+}
+
+void test_hard_create_map()
+{
+    reset_terminal();
+    int rows, columns, path_length, max_value, min_value, max_block, min_block;
+    cout << "Enter count of rows: ";
+    cin >> rows;
+    cout << "Enter count of columns: ";
+    cin >> columns;
+    cout << "Enter path length: ";
+    cin >> path_length;
+    cout << "Enter max value of cells: ";
+    cin >> max_value;
+    cout << "Enter min value of cells: ";
+    cin >> min_value;
+    cout << "Enter max block of cells: ";
+    cin >> max_block;
+    cout << "Enter min block of cells: ";
+    cin >> min_block;
+    reset_terminal();
+    int **table;
+    table = new int *[rows];
+    for (int i = 0; i < rows; i++)
+    {
+        table[i] = new int[columns];
+    }
+    if (!create_map(table, rows, columns, path_length, max_value, min_value, max_block, min_block))
+    {
+        cout << "Invalid path! Cannot create the table." << endl;
+        delete[] table;
+        return;
+    }
+    vector<position> path = findPath(table, rows, columns, path_length);
     position user_index;
     show_table(table, rows, columns, path, user_index);
     if (path.empty())
@@ -166,14 +236,14 @@ int start_menu()
         switch (getch())
         {
         case UP_KEY:
-            selected_option--; // key up
+            selected_option--;
             if (selected_option == 4)
                 selected_option = 3;
             else if (selected_option == 7)
                 selected_option = 6;
             break;
         case DOWN_KEY:
-            selected_option++; // key down
+            selected_option++;
             if (selected_option == 4)
                 selected_option = 5;
             else if (selected_option == 7)
@@ -206,7 +276,7 @@ void show_table(int **table, int rows, int columns, vector<position> path,
             }
         }
     }
-    const int cell_width = max_length + 2;
+    const int cell_width = max_length + 4;
     int left_spaces, right_spaces, number_size, total_spaces;
     position point;
     for (int j=0; j<columns; j++)
@@ -339,7 +409,6 @@ vector<position> findPath(int** table, int rows, int columns, int path_length)
             visited[i][j] = false;
         }
     }
-	bool flag = false;
     vector<position> path;
     vector<position> empty;
     if (isaPath(table, 0, 0, visited, rows, columns, path, path_length, 0))
@@ -427,6 +496,158 @@ position generate_random_position(position min_position, position max_position, 
     } while (true);
 }
 
+bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
+                  vector<position>& path, int path_length)
+{
+	if (isSafePosition(i, j, table, rows, columns) && path.size() <= path_length
+		&& !visited[i][j])
+	{
+		if (i == rows-1 && j == columns-1)
+		{
+            if (path.size() == path_length)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        visited[i][j] = true;
+        position point;
+        point.row = i;
+        point.col = j;
+        path.push_back(point);
+        string movements[4] = {"up", "left", "down", "right"};
+        shuffle_array(movements, 4);
+        bool up, left, down, right;
+        for (int x=0; x<4; x++)
+        {
+            if (movements[x] == "up")
+            {
+                up = isSimplePath(table, i - 1, j, visited, rows, columns, path, path_length);
+                if (up)
+                    return true;
+            }
+            else if (movements[x] == "left")
+            {
+                left = isSimplePath(table, i, j - 1, visited, rows, columns, path, path_length);
+                if (left)
+                    return true;
+            }
+            else if (movements[x] == "down")
+            {
+                down = isSimplePath(table, i + 1, j, visited, rows, columns, path, path_length);
+                if (down)
+                    return true;
+            }
+            else if (movements[x] == "right")
+            {
+                right = isSimplePath(table, i, j + 1, visited, rows, columns, path, path_length);
+                if (right)
+                    return true;
+            }
+        }
+        visited[i][j] = false;
+        path.pop_back();
+	}
+	return false;
+}
+
+/*Create a hard map*/
+bool create_map(int **table, int rows, int columns, int path_length,
+                int max_value, int min_value, int max_block, int min_block)
+{
+    int min_path_length = rows + columns -2;
+    if (path_length < min_path_length)
+    {
+        return false;
+    }
+    else 
+    {
+        if (path_length - min_path_length % 2 == 1)
+        {
+            return false;    
+        }
+    }
+    int path_random_numbers[path_length];
+    int path_sum_numbers = 0;
+    int ignored_numbers[1] = {0};
+    int empty_array[0] = {};
+    // generate random numbers of path
+    while (path_sum_numbers == 0)
+    {
+        for (int i = 0; i < path_length; i++)
+        {
+            path_random_numbers[i] = generate_random(min_value, max_value, ignored_numbers, 1);
+            path_sum_numbers += path_random_numbers[i];
+        }
+    }
+    // generate random indexes of path
+    vector<position> path_positions;
+    bool** visited = new bool*[rows];
+    for (int i=0; i<rows; i++)
+    {
+        visited[i] = new bool[columns];
+        for (int j=0; j<columns; j++)
+        {
+            visited[i][j] = false;
+        }
+    }
+    if (!isSimplePath(table, 0, 0, visited, rows, columns, path_positions, path_length)){
+        return false;
+    }
+    for (int i=0; i<path_positions.size(); i++)
+    {
+        table[path_positions[i].row][path_positions[i].col] = path_random_numbers[i];
+    }
+    position last_index;
+    last_index.row = rows -1;
+    last_index.col = columns - 1;
+    path_positions.push_back(last_index);
+    table[rows - 1][columns - 1] = path_sum_numbers;
+    // generate random block indexes
+    int count_block = generate_random(min_block, max_block, empty_array, 0);
+    position blocks[count_block + path_length + 1];
+    position temp_point;
+    for (int i = 0; i < path_length + 1; i++)
+    {
+        blocks[i] = path_positions[i];
+    }
+    position min_position;
+    min_position.row = 0;
+    min_position.col = 0;
+    position max_position;
+    max_position.row = rows - 1;
+    max_position.col = columns - 1;
+    for (int i = path_length + 1; i < count_block + path_length + 1; i++)
+    {
+        blocks[i] = generate_random_position(min_position, max_position, blocks, i);
+        table[blocks[i].row][blocks[i].col] = 100000000;
+    }
+    // generate other numbers of table
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            temp_point.row = i;
+            temp_point.col = j;
+            if (!isin_position(path_positions, temp_point))
+            {
+                if (table[i][j] != 100000000)
+                {
+                    table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
+                }
+                else
+                {
+                    table[i][j] = 0;
+                }
+            }
+        }
+    }
+   return true;
+}
+
 /*Create an easy map*/
 void create_map(int **table, int rows, int columns)
 {
@@ -440,10 +661,13 @@ void create_map(int **table, int rows, int columns)
     int path_sum_numbers = 0;
     int ignored_numbers[1] = {0};
     // generate random numbers of path
-    for (int i = 0; i < path_length; i++)
+    while (path_sum_numbers == 0)
     {
-        path_random_numbers[i] = generate_random(min_value, max_value, ignored_numbers, 1);
-        path_sum_numbers += path_random_numbers[i];
+        for (int i = 0; i < path_length; i++)
+        {
+            path_random_numbers[i] = generate_random(min_value, max_value, ignored_numbers, 1);
+            path_sum_numbers += path_random_numbers[i];
+        }
     }
     // generate random movements of path
     int down_positions[rows - 1];
@@ -477,6 +701,7 @@ void create_map(int **table, int rows, int columns)
     path_positions[path_length].col = columns - 1;
     table[rows - 1][columns - 1] = path_sum_numbers;
     // generate random block indexes
+    // TODO: limit the count of blocks
     int empty_array[0] = {};
     int count_block = generate_random(min_block, max_block, empty_array, 0);
     position blocks[count_block + path_length + 1];
