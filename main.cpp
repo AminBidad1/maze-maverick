@@ -74,10 +74,18 @@ void test_create_map()
         cout << endl;
     }
     vector<position> path = findPath(table, rows, columns, rows + columns - 2);
-
-    for (int i=0; i<path.size(); i++){
-        cout << "[" << path[i].row << "," << path[i].col << "]\t";
+    if (path.empty())
+    {
+        cout << "Path does not exist!" << endl;
     }
+    else 
+    {
+        for (int i=0; i<path.size(); i++)
+        {
+            cout << "[" << path[i].row << "," << path[i].col << "]\t";
+        }
+    }
+    delete[] table;
 }
 
 void read_UserInfo(string &user_name)
