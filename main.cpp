@@ -29,6 +29,7 @@ void create_map(int **table, int rows, int columns);
 int generate_random(int min_value, int max_value, int *ignored_numbers, int size);
 bool isin(int list[], int number, int size);
 bool isin_position(position positions[], position point, int size);
+bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void test_create_map();
 void read_UserInfo(string &user_name);
@@ -37,6 +38,9 @@ bool isSafePosition(int i, int j, int** table, int rows, int columns);
 bool isaPath(int** table, int i, int j, bool** visited,int rows, int columns,
              vector<position>& path, int path_length, int sum);
 vector<position> findPath(int** table, int rows, int columns, int path_length);
+void show_table(int **table, int rows, int columns, vector<position> path,
+                position user_index);
+
 
 int main()
 {
@@ -65,25 +69,12 @@ void test_create_map()
         table[i] = new int[columns];
     }
     create_map(table, rows, columns);
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < columns; j++)
-        {
-            cout << table[i][j] << " ";
-        }
-        cout << endl;
-    }
     vector<position> path = findPath(table, rows, columns, rows + columns - 2);
+    position user_index;
+    show_table(table, rows, columns, path, user_index);
     if (path.empty())
     {
         cout << "Path does not exist!" << endl;
-    }
-    else 
-    {
-        for (int i=0; i<path.size(); i++)
-        {
-            cout << "[" << path[i].row << "," << path[i].col << "]\t";
-        }
     }
     delete[] table;
 }
@@ -201,6 +192,84 @@ int start_menu()
     }
 }
 
+void show_table(int **table, int rows, int columns, vector<position> path,
+                position user_index)
+{
+    int max_length = 0;
+    for (int i=0; i<rows; i++)
+    {
+        for (int j=0; j<columns; j++)
+        {
+            if (to_string(table[i][j]).length() > max_length)
+            {
+                max_length = to_string(table[i][j]).length();
+            }
+        }
+    }
+    const int cell_width = max_length + 2;
+    int left_spaces, right_spaces, number_size, total_spaces;
+    position point;
+    for (int j=0; j<columns; j++)
+    {
+        cout << '+' << string(cell_width, '-');
+    }
+    cout << '+' << endl;
+    for (int i=0; i<rows; i++)
+    {
+        for (int j=0; j<columns; j++)
+        {
+            number_size = to_string(table[i][j]).length();
+            total_spaces = cell_width - number_size;
+            right_spaces = total_spaces/2;
+            left_spaces = total_spaces - right_spaces;
+            point.row = i;
+            point.col = j;
+            cout << '|';
+            if (i == 0 && j == 0)
+            {
+                cout << color::rize(string(left_spaces, ' '), "Red", "Blue");
+                cout << color::rize(to_string(table[i][j]), "Red", "Blue");
+                cout << color::rize(string(right_spaces, ' '), "Red", "Blue");
+            }
+            else if (i == rows-1 && j == columns-1)
+            {
+                cout << color::rize(string(left_spaces, ' '), "Blue", "Red");
+                cout << color::rize(to_string(table[i][j]), "Blue", "Red");
+                cout << color::rize(string(right_spaces, ' '), "Blue", "Red");
+            }
+            else if (user_index.row == i && user_index.col == j)
+            {
+                cout << color::rize(string(left_spaces, ' '), "White", "Green");
+                cout << color::rize(to_string(table[i][j]), "White", "Green");
+                cout << color::rize(string(right_spaces, ' '), "White", "Green");
+            }
+            else if (table[i][j] == 0)
+            {
+                cout << color::rize(string(left_spaces, ' '), "Red", "Light Yellow");
+                cout << color::rize(to_string(table[i][j]), "Red", "Light Yellow");
+                cout << color::rize(string(right_spaces, ' '), "Red", "Light Yellow");
+            }
+            else if (isin_position(path, point))
+            {
+                cout << color::rize(string(left_spaces, ' '), "Red", "Light Blue");
+                cout << color::rize(to_string(table[i][j]), "Red", "Light Blue");
+                cout << color::rize(string(right_spaces, ' '), "Red", "Light Blue");
+            }
+            else
+            {
+                cout << string(left_spaces, ' ');
+                cout << to_string(table[i][j]);
+                cout << string(right_spaces, ' ');
+            }
+        }
+        cout << '|' << endl;
+        for (int j=0; j<columns; j++)
+        {
+            cout << '+' << string(cell_width, '-');
+        }
+        cout << '+' << endl;
+    }
+}
 
 bool isSafePosition(int i, int j, int **table, int rows, int columns)
 {
@@ -208,7 +277,6 @@ bool isSafePosition(int i, int j, int **table, int rows, int columns)
 		return true;
 	return false;
 }
-
 
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
              vector<position>& path,int path_length, int sum)
@@ -319,6 +387,22 @@ bool isin_position(position positions[], position point, int size)
         return false;
     }
     for (int i = 0; i < size; i++)
+    {
+        if (positions[i].row == point.row && positions[i].col == point.col)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isin_position(vector<position> positions, position point)
+{
+    if (positions.size() == 0)
+    {
+        return false;
+    }
+    for (int i = 0; i < positions.size(); i++)
     {
         if (positions[i].row == point.row && positions[i].col == point.col)
         {
