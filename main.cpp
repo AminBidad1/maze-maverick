@@ -227,15 +227,16 @@ void show_table(int **table, int rows, int columns, vector<position> path,
             cout << '|';
             if (i == 0 && j == 0)
             {
-                cout << color::rize(string(left_spaces, ' '), "Red", "Blue");
-                cout << color::rize(to_string(table[i][j]), "Red", "Blue");
-                cout << color::rize(string(right_spaces, ' '), "Red", "Blue");
-            }
-            else if (i == rows-1 && j == columns-1)
-            {
                 cout << color::rize(string(left_spaces, ' '), "Blue", "Red");
                 cout << color::rize(to_string(table[i][j]), "Blue", "Red");
                 cout << color::rize(string(right_spaces, ' '), "Blue", "Red");
+            }
+            else if (i == rows-1 && j == columns-1)
+            {
+                cout << color::rize(string(left_spaces, ' '), "Red", "Blue");
+                cout << color::rize(to_string(table[i][j]), "Red", "Blue");
+                cout << color::rize(string(right_spaces, ' '), "Red", "Blue");
+                
             }
             else if (user_index.row == i && user_index.col == j)
             {
