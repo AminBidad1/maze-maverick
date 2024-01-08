@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <iostream>
+#include <bits/stdc++.h>
 #include <time.h>
 #include "colors.hpp"
 #include <string>
@@ -33,6 +33,10 @@ position generate_random_position(position min_position, position max_position, 
 void test_create_map();
 void read_UserInfo(string &user_name);
 void read_History();
+bool isSafePosition(int i, int j, int** table, int rows, int columns);
+bool isaPath(int** table, int i, int j, bool** visited,int rows, int columns,
+             vector<position>& path, int path_length, int sum);
+vector<position> findPath(int** table, int rows, int columns, int path_length);
 
 int main()
 {
@@ -68,6 +72,11 @@ void test_create_map()
             cout << table[i][j] << " ";
         }
         cout << endl;
+    }
+    vector<position> path = findPath(table, rows, columns, rows + columns - 2);
+
+    for (int i=0; i<path.size(); i++){
+        cout << "[" << path[i].row << "," << path[i].col << "]\t";
     }
 }
 
@@ -140,7 +149,8 @@ int start_menu()
         "   3.2 Import a Custom Map",
         "4. History",
         "5. Leaderboard",
-        "6. Exit"};
+        "6. Exit"
+    };
     while (true)
     {
         for (int i = 0; i < 12; i++)
@@ -180,6 +190,88 @@ int start_menu()
         else if (selected_option <= 1)
             selected_option = 2;
         reset_terminal();
+    }
+}
+
+
+bool isSafePosition(int i, int j, int **table, int rows, int columns)
+{
+	if (i >= 0 && i < rows && j >= 0 && j < columns)
+		return true;
+	return false;
+}
+
+
+bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
+             vector<position>& path,int path_length, int sum)
+{
+	if ((isSafePosition(i, j, table, rows, columns) && table[i][j] != 0)
+		&& (!visited[i][j] && path.size() <= path_length))
+	{
+		visited[i][j] = true;
+		if (i == rows-1 && j == columns-1)
+		{
+            if (path.size() == path_length && sum == table[i][j])
+            {
+                return true;
+            }
+            else
+            {
+                visited[i][j] = false;
+                return false;
+            }
+        }
+        position point;
+        point.row = i;
+        point.col = j;
+        path.push_back(point);
+		bool up = isaPath(table, i - 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+		if (up)
+		{
+			return true;
+        }
+		bool left = isaPath(table, i, j - 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+		if (left)
+		{
+			return true;
+        }
+		bool down = isaPath(table, i + 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+		if (down)
+		{
+			return true;
+        }
+		bool right = isaPath(table, i, j + 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+		if (right)
+		{
+			return true;
+        }
+        visited[i][j] = false;
+        path.pop_back();
+	}
+	return false;
+}
+
+vector<position> findPath(int** table, int rows, int columns, int path_length)
+{
+	bool** visited = new bool*[rows];
+    for (int i=0; i<rows; i++)
+    {
+        visited[i] = new bool[columns];
+        for (int j=0; j<columns; j++)
+        {
+            visited[i][j] = false;
+        }
+    }
+	bool flag = false;
+    vector<position> path;
+    vector<position> empty;
+    if (isaPath(table, 0, 0, visited, rows, columns, path, path_length, 0))
+    {
+        return path;
+    }
+    else
+    {
+        return empty;
     }
 }
 
