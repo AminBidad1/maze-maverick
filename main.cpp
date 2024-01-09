@@ -11,10 +11,14 @@ using namespace std;
 #include <conio.h>
 const int UP_KEY = 72;
 const int DOWN_KEY = 80;
+const int RIGHT_KEY = 77;
+const int LEFT_KEY = 75;
 #elif defined(__LINUX__) || defined(__gnu_linux__) || defined(__linux__)
 #include <termios.h>
 const int UP_KEY = 65;
 const int DOWN_KEY = 66;
+const int RIGHT_KEY = 67;
+const int LEFT_KEY = 68;
 int getch(void);
 #endif
 
@@ -25,7 +29,7 @@ struct position
 
 void reset_terminal();
 int start_menu();
-void create_map(int **table, int rows, int columns);
+bool create_map(int **table, int rows, int columns);
 bool create_map(int **table, int rows, int columns, int path_length,
                 int max_value, int min_value, int max_block, int min_block);
 int generate_random(int min_value, int max_value, int *ignored_numbers, int size);
@@ -33,8 +37,6 @@ bool isin(int list[], int number, int size);
 bool isin_position(position positions[], position point, int size);
 bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
-void test_create_map();
-void test_hard_create_map();
 void read_UserInfo(string &user_name);
 void read_History();
 bool isSafePosition(int i, int j, int** table, int rows, int columns);
@@ -45,6 +47,13 @@ void show_table(int **table, int rows, int columns, vector<position> path,
                 position user_index);
 bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
                   vector<position>& path, int path_length);
+bool play_game(int **table, int rows, int columns,
+               position& current_position, vector<position> path);
+bool can_move(int **table, int rows, int columns, int i, int j, 
+              vector<position> path);
+void test_create_map();
+void test_hard_create_map();
+void test_play_game();
 
 
 template <typename T> 
@@ -79,7 +88,51 @@ int main()
     {
         test_hard_create_map();
     }
+    else if (selected_option == 5)
+    {
+        test_play_game();
+    }
     return 0;
+}
+
+void test_play_game()
+{
+    reset_terminal();
+    int rows, columns, path_length, max_value, min_value, max_block, min_block;
+    cout << "Enter count of rows: ";
+    cin >> rows;
+    cout << "Enter count of columns: ";
+    cin >> columns;
+    cout << "Enter path length: ";
+    cin >> path_length;
+    cout << "Enter max value of cells: ";
+    cin >> max_value;
+    cout << "Enter min value of cells: ";
+    cin >> min_value;
+    cout << "Enter max block of cells: ";
+    cin >> max_block;
+    cout << "Enter min block of cells: ";
+    cin >> min_block;
+    reset_terminal();
+    int **table;
+    table = new int *[rows];
+    for (int i = 0; i < rows; i++)
+    {
+        table[i] = new int[columns];
+    }
+    if (!create_map(table, rows, columns, path_length, max_value, min_value, max_block, min_block))
+    {
+        cout << "Invalid path or Cannot create the table." << endl;
+        delete[] table;
+        return;
+    }
+    vector<position> path;
+    position user_index;
+    user_index.row = 0;
+    user_index.col = 0;
+    path.push_back(user_index);
+    play_game(table, rows, columns, user_index, path);
+    delete[] table;
 }
 
 void test_create_map()
@@ -97,7 +150,11 @@ void test_create_map()
     {
         table[i] = new int[columns];
     }
-    create_map(table, rows, columns);
+    if (!create_map(table, rows, columns))
+    {
+        cout << "Can't Create" << endl;
+        return;
+    }
     vector<position> path = findPath(table, rows, columns, rows + columns - 2);
     position user_index;
     show_table(table, rows, columns, path, user_index);
@@ -259,6 +316,120 @@ int start_menu()
         else if (selected_option <= 1)
             selected_option = 2;
         reset_terminal();
+    }
+}
+
+bool can_move(int **table, int rows, int columns, int i, int j, 
+              vector<position> path)
+{
+    if (isSafePosition(i, j, table, rows, columns))
+    {
+        if (table[i][j] == 0)
+        {
+            return false;
+        }
+        position point;
+        point.row = i;
+        point.col = j;
+        if (isin_position(path, point))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+bool play_game(int **table, int rows, int columns,
+               position& current_position, vector<position> path)
+{
+    reset_terminal();
+    show_table(table, rows, columns, path, current_position);
+    int sum = table[0][0];
+    while (true)
+    {
+        if (current_position.row == rows -1 && current_position.col == columns -1)
+        {
+            if (sum == table[rows-1][columns-1])
+            {
+                cout << color::rize(" You Won! ", "White", "Green") << endl;
+                return true;
+            }
+            else
+            {
+                cout << color::rize(" You Lost! ", "Light Yellow", "Red") << endl;
+                return false;
+            }
+        }
+        if (
+            can_move(table, rows, columns, current_position.row - 1, current_position.col, path) ||
+            can_move(table, rows, columns, current_position.row + 1, current_position.col, path) ||
+            can_move(table, rows, columns, current_position.row, current_position.col - 1, path) ||
+            can_move(table, rows, columns, current_position.row, current_position.col + 1, path)
+            )
+        {
+            switch (getch())
+            {
+            case UP_KEY:
+                if (can_move(table, rows, columns, current_position.row - 1, current_position.col, path))
+                {
+                    current_position.row -= 1;
+                    path.push_back(current_position);
+                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                        sum += table[current_position.row][current_position.col];
+                    reset_terminal();
+                    show_table(table, rows, columns, path, current_position);
+                }
+                break;
+            case DOWN_KEY:
+                if (can_move(table, rows, columns, current_position.row + 1, current_position.col, path))
+                {
+                    current_position.row += 1;
+                    path.push_back(current_position);
+                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                        sum += table[current_position.row][current_position.col];
+                    reset_terminal();
+                    show_table(table, rows, columns, path, current_position);
+                }
+                break;
+            case LEFT_KEY:
+                if (can_move(table, rows, columns, current_position.row, current_position.col - 1, path))
+                {
+                    current_position.col -= 1;
+                    path.push_back(current_position);
+                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                        sum += table[current_position.row][current_position.col];
+                    reset_terminal();
+                    show_table(table, rows, columns, path, current_position);
+                }
+                break;
+            case RIGHT_KEY:
+                if (can_move(table, rows, columns, current_position.row, current_position.col + 1, path))
+                {
+                    current_position.col += 1;
+                    path.push_back(current_position);
+                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                        sum += table[current_position.row][current_position.col];
+                    reset_terminal();
+                    show_table(table, rows, columns, path, current_position);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        else
+        {
+            cout << color::rize(" You Lost! ", "Light Yellow", "Red") << endl;
+            return false;
+        }
     }
 }
 
@@ -570,6 +741,15 @@ bool create_map(int **table, int rows, int columns, int path_length,
             return false;    
         }
     }
+    const int count_cells = rows * columns;
+    if (path_length + min_block >= count_cells)
+    {
+        return false;
+    }
+    else if (path_length + max_block >= count_cells)
+    {
+        max_block = count_cells - path_length - 1;
+    }
     int path_random_numbers[path_length];
     int path_sum_numbers = 0;
     int ignored_numbers[1] = {0};
@@ -649,14 +829,23 @@ bool create_map(int **table, int rows, int columns, int path_length,
 }
 
 /*Create an easy map*/
-void create_map(int **table, int rows, int columns)
+bool create_map(int **table, int rows, int columns)
 {
     // initial values
     const int path_length = rows + columns - 2;
     const int max_value = 3;
     const int min_value = -3;
-    const int max_block = 5;
-    const int min_block = 2;
+    int max_block = 5;
+    int min_block = 2;
+    const int count_cells = rows * columns;
+    if (path_length + min_block >= count_cells)
+    {
+        return false;
+    }
+    else if (path_length + max_block >= count_cells)
+    {
+        max_block = count_cells - path_length - 1;
+    }
     int path_random_numbers[path_length];
     int path_sum_numbers = 0;
     int ignored_numbers[1] = {0};
@@ -701,7 +890,6 @@ void create_map(int **table, int rows, int columns)
     path_positions[path_length].col = columns - 1;
     table[rows - 1][columns - 1] = path_sum_numbers;
     // generate random block indexes
-    // TODO: limit the count of blocks
     int empty_array[0] = {};
     int count_block = generate_random(min_block, max_block, empty_array, 0);
     position blocks[count_block + path_length + 1];
@@ -741,6 +929,7 @@ void create_map(int **table, int rows, int columns)
             }
         }
     }
+    return true;
 }
 
 #if defined(__LINUX__) || defined(__gnu_linux__) || defined(__linux__)
