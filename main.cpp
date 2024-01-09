@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <sstream>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
-void write_UserInfo(const string &user_name);
+void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
@@ -289,8 +290,36 @@ void read_History()
 
 void write_UserInfo(const string &user_name, const int &status, const int time_spent)
 {
-    // ofstream outfile("./Users/" + user_name + ".txt");
-    // processing
+    string filePath = "./Users/" + user_name + ".txt";
+    fstream outputFile(filePath, ios::in | ios::out);
+
+    if (!outputFile)
+    {
+        cerr << "Error: Could not open the file " << filePath << endl;
+        return;
+    }
+
+    int totalGames, totalWins;
+    string lastWinTimeStr, line;
+    time_t lastWinTime, totalTimeSpent;
+    outputFile >> totalGames >> totalWins >> lastWinTimeStr >> totalTimeSpent;
+    struct tm tm = {};
+    istringstream ss(lastWinTimeStr);
+    ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    lastWinTime = mktime(&tm);
+    totalGames++;
+
+    if (status == 1)
+    {
+        totalWins++;
+        lastWinTime = time(0);
+    }
+
+    totalTimeSpent += time_spent;
+    // Move the file cursor to the beginning
+    outputFile.seekp(0);
+    outputFile << totalGames << " " << totalWins << " " << lastWinTime << " " << totalTimeSpent << endl;
+    outputFile.close();
 }
 
 void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent)
