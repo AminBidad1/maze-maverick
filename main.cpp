@@ -4,6 +4,7 @@
 #include "colors.hpp"
 #include <string>
 #include <fstream>
+#include <chrono>
 
 using namespace std;
 
@@ -22,6 +23,25 @@ const int RIGHT_KEY = 67;
 const int LEFT_KEY = 68;
 int getch(void);
 #endif
+
+class GameTimer
+{
+private:
+    chrono::high_resolution_clock::time_point startTime;
+
+public:
+    void start()
+    {
+        startTime = chrono::high_resolution_clock::now();
+    }
+
+    int stop()
+    {
+        auto endTime = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::seconds>(endTime - startTime);
+        return static_cast<int>(duration.count());
+    }
+};
 
 struct position
 {
@@ -49,10 +69,10 @@ vector<position> findPath(int **table, int rows, int columns, int path_length);
 void show_table(int **table, int rows, int columns, vector<position> path,
                 position user_index);
 bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
-                  vector<position>& path, int path_length);
+                  vector<position> &path, int path_length);
 bool play_game(int **table, int rows, int columns,
-               position& current_position, vector<position> path);
-bool can_move(int **table, int rows, int columns, int i, int j, 
+               position &current_position, vector<position> path);
+bool can_move(int **table, int rows, int columns, int i, int j,
               vector<position> path);
 void test_create_map();
 void test_hard_create_map();
@@ -93,6 +113,10 @@ int main()
     {
         test_play_game();
     }
+    else if (selected_option == 10)
+    {
+        read_History();
+    }
     return 0;
 }
 
@@ -132,7 +156,10 @@ void test_play_game()
     user_index.row = 0;
     user_index.col = 0;
     path.push_back(user_index);
+    GameTimer gameTimer;
+    gameTimer.start();
     play_game(table, rows, columns, user_index, path);
+    int elapsedTimeInSeconds = gameTimer.stop();
     delete[] table;
 }
 
@@ -363,7 +390,7 @@ int start_menu()
     }
 }
 
-bool can_move(int **table, int rows, int columns, int i, int j, 
+bool can_move(int **table, int rows, int columns, int i, int j,
               vector<position> path)
 {
     if (isSafePosition(i, j, table, rows, columns))
@@ -390,18 +417,17 @@ bool can_move(int **table, int rows, int columns, int i, int j,
     }
 }
 
-
 bool play_game(int **table, int rows, int columns,
-               position& current_position, vector<position> path)
+               position &current_position, vector<position> path)
 {
     reset_terminal();
     show_table(table, rows, columns, path, current_position);
     int sum = table[0][0];
     while (true)
     {
-        if (current_position.row == rows -1 && current_position.col == columns -1)
+        if (current_position.row == rows - 1 && current_position.col == columns - 1)
         {
-            if (sum == table[rows-1][columns-1])
+            if (sum == table[rows - 1][columns - 1])
             {
                 cout << color::rize(" You Won! ", "White", "Green") << endl;
                 return true;
@@ -416,8 +442,7 @@ bool play_game(int **table, int rows, int columns,
             can_move(table, rows, columns, current_position.row - 1, current_position.col, path) ||
             can_move(table, rows, columns, current_position.row + 1, current_position.col, path) ||
             can_move(table, rows, columns, current_position.row, current_position.col - 1, path) ||
-            can_move(table, rows, columns, current_position.row, current_position.col + 1, path)
-            )
+            can_move(table, rows, columns, current_position.row, current_position.col + 1, path))
         {
             switch (getch())
             {
@@ -426,7 +451,7 @@ bool play_game(int **table, int rows, int columns,
                 {
                     current_position.row -= 1;
                     path.push_back(current_position);
-                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                    if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
                         sum += table[current_position.row][current_position.col];
                     reset_terminal();
                     show_table(table, rows, columns, path, current_position);
@@ -437,7 +462,7 @@ bool play_game(int **table, int rows, int columns,
                 {
                     current_position.row += 1;
                     path.push_back(current_position);
-                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                    if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
                         sum += table[current_position.row][current_position.col];
                     reset_terminal();
                     show_table(table, rows, columns, path, current_position);
@@ -448,7 +473,7 @@ bool play_game(int **table, int rows, int columns,
                 {
                     current_position.col -= 1;
                     path.push_back(current_position);
-                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                    if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
                         sum += table[current_position.row][current_position.col];
                     reset_terminal();
                     show_table(table, rows, columns, path, current_position);
@@ -459,7 +484,7 @@ bool play_game(int **table, int rows, int columns,
                 {
                     current_position.col += 1;
                     path.push_back(current_position);
-                    if (!(current_position.row == rows -1 && current_position.col == columns -1))
+                    if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
                         sum += table[current_position.row][current_position.col];
                     reset_terminal();
                     show_table(table, rows, columns, path, current_position);
