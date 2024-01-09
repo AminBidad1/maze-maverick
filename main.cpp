@@ -38,6 +38,7 @@ void test_create_map();
 void test_hard_create_map();
 void read_UserInfo(string &user_name);
 void read_History();
+void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
              vector<position> &path, int path_length, int sum);
@@ -182,15 +183,15 @@ void read_History()
             if (getline(infile, line))
             {
                 cout << "Game " << i << ":\n";
-                cout << "Date: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "User: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Map name: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Time spent: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Result: " << line << endl
+                cout << line << endl
                      << endl;
             }
         }
@@ -200,7 +201,43 @@ void read_History()
         cerr << "Unable to open the file for reading." << endl;
     }
 }
+void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent)
+{
+    ifstream infile("./Stats/History.txt");
 
+    if (!infile)
+    {
+        cerr << "Unable to open the file for reading." << endl;
+        return;
+    }
+
+    string existing_content((istreambuf_iterator<char>(infile)), istreambuf_iterator<char>());
+    infile.close();
+
+    ofstream outfile("./Stats/History.txt");
+
+    if (outfile.is_open())
+    {
+        time_t now = time(0);
+        tm *local_time = localtime(&now);
+        char date_time[80];
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
+
+        outfile << date_time << "\n";
+        outfile << "User: " << user_name << "\n";
+        outfile << "Map name: " << map_name << "\n";
+        outfile << "Time spent: " << time_spent << "\n";
+        outfile << "Result: " << result << "\n";
+
+        outfile << existing_content;
+
+        outfile.close();
+    }
+    else
+    {
+        cerr << "Unable to open the file for writing." << endl;
+    }
+}
 int start_menu()
 {
     reset_terminal();
