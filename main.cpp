@@ -11,6 +11,7 @@ using namespace std;
 #include <conio.h>
 const int UP_KEY = 72;
 const int DOWN_KEY = 80;
+const int ENTER_KEY = 13;
 const int RIGHT_KEY = 77;
 const int LEFT_KEY = 75;
 #elif defined(__LINUX__) || defined(__gnu_linux__) || defined(__linux__)
@@ -39,10 +40,12 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
-bool isSafePosition(int i, int j, int** table, int rows, int columns);
-bool isaPath(int** table, int i, int j, bool** visited,int rows, int columns,
-             vector<position>& path, int path_length, int sum);
-vector<position> findPath(int** table, int rows, int columns, int path_length);
+void write_UserInfo(const string &user_name);
+void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent);
+bool isSafePosition(int i, int j, int **table, int rows, int columns);
+bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
+             vector<position> &path, int path_length, int sum);
+vector<position> findPath(int **table, int rows, int columns, int path_length);
 void show_table(int **table, int rows, int columns, vector<position> path,
                 position user_index);
 bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
@@ -55,9 +58,8 @@ void test_create_map();
 void test_hard_create_map();
 void test_play_game();
 
-
-template <typename T> 
-void swap(T* a, T* b)
+template <typename T>
+void swap(T *a, T *b)
 {
     T temp = *a;
     *a = *b;
@@ -68,13 +70,12 @@ template <typename T>
 void shuffle_array(T inputs[], int count)
 {
     int random_number;
-    for (int i=count-1; i>0; i--)
+    for (int i = count - 1; i > 0; i--)
     {
         random_number = rand() % (i + 1);
         swap(inputs[i], inputs[random_number]);
     }
 }
-
 
 int main()
 {
@@ -240,15 +241,15 @@ void read_History()
             if (getline(infile, line))
             {
                 cout << "Game " << i << ":\n";
-                cout << "Date: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "User: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Map name: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Time spent: " << line << endl;
+                cout << line << endl;
                 getline(infile, line);
-                cout << "Result: " << line << endl
+                cout << line << endl
                      << endl;
             }
         }
@@ -256,6 +257,50 @@ void read_History()
     else
     {
         cerr << "Unable to open the file for reading." << endl;
+    }
+}
+
+void write_UserInfo(const string &user_name, const int &status, const int time_spent)
+{
+    // ofstream outfile("./Users/" + user_name + ".txt");
+    // processing
+}
+
+void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent)
+{
+    ifstream infile("./Stats/History.txt");
+
+    if (!infile)
+    {
+        cerr << "Unable to open the file for reading." << endl;
+        return;
+    }
+
+    string existing_content((istreambuf_iterator<char>(infile)), istreambuf_iterator<char>());
+    infile.close();
+
+    ofstream outfile("./Stats/History.txt");
+
+    if (outfile.is_open())
+    {
+        time_t now = time(0);
+        tm *local_time = localtime(&now);
+        char date_time[80];
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
+
+        outfile << date_time << "\n";
+        outfile << "User: " << user_name << "\n";
+        outfile << "Map name: " << map_name << "\n";
+        outfile << "Time spent: " << time_spent << "\n";
+        outfile << "Result: " << result << "\n";
+
+        outfile << existing_content;
+
+        outfile.close();
+    }
+    else
+    {
+        cerr << "Unable to open the file for writing." << endl;
     }
 }
 
@@ -275,8 +320,7 @@ int start_menu()
         "   3.2 Import a Custom Map",
         "4. History",
         "5. Leaderboard",
-        "6. Exit"
-    };
+        "6. Exit"};
     while (true)
     {
         for (int i = 0; i < 12; i++)
@@ -306,7 +350,7 @@ int start_menu()
             else if (selected_option == 7)
                 selected_option = 8;
             break;
-        case '\n':
+        case ENTER_KEY:
             return selected_option; // enter key
         default:
             break;
@@ -437,9 +481,9 @@ void show_table(int **table, int rows, int columns, vector<position> path,
                 position user_index)
 {
     int max_length = 0;
-    for (int i=0; i<rows; i++)
+    for (int i = 0; i < rows; i++)
     {
-        for (int j=0; j<columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             if (to_string(table[i][j]).length() > max_length)
             {
@@ -450,18 +494,18 @@ void show_table(int **table, int rows, int columns, vector<position> path,
     const int cell_width = max_length + 4;
     int left_spaces, right_spaces, number_size, total_spaces;
     position point;
-    for (int j=0; j<columns; j++)
+    for (int j = 0; j < columns; j++)
     {
         cout << '+' << string(cell_width, '-');
     }
     cout << '+' << endl;
-    for (int i=0; i<rows; i++)
+    for (int i = 0; i < rows; i++)
     {
-        for (int j=0; j<columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             number_size = to_string(table[i][j]).length();
             total_spaces = cell_width - number_size;
-            right_spaces = total_spaces/2;
+            right_spaces = total_spaces / 2;
             left_spaces = total_spaces - right_spaces;
             point.row = i;
             point.col = j;
@@ -472,12 +516,11 @@ void show_table(int **table, int rows, int columns, vector<position> path,
                 cout << color::rize(to_string(table[i][j]), "Blue", "Red");
                 cout << color::rize(string(right_spaces, ' '), "Blue", "Red");
             }
-            else if (i == rows-1 && j == columns-1)
+            else if (i == rows - 1 && j == columns - 1)
             {
                 cout << color::rize(string(left_spaces, ' '), "Red", "Blue");
                 cout << color::rize(to_string(table[i][j]), "Red", "Blue");
                 cout << color::rize(string(right_spaces, ' '), "Red", "Blue");
-                
             }
             else if (user_index.row == i && user_index.col == j)
             {
@@ -505,7 +548,7 @@ void show_table(int **table, int rows, int columns, vector<position> path,
             }
         }
         cout << '|' << endl;
-        for (int j=0; j<columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             cout << '+' << string(cell_width, '-');
         }
@@ -515,20 +558,19 @@ void show_table(int **table, int rows, int columns, vector<position> path,
 
 bool isSafePosition(int i, int j, int **table, int rows, int columns)
 {
-	if (i >= 0 && i < rows && j >= 0 && j < columns)
-		return true;
-	return false;
+    if (i >= 0 && i < rows && j >= 0 && j < columns)
+        return true;
+    return false;
 }
 
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
-             vector<position>& path,int path_length, int sum)
+             vector<position> &path, int path_length, int sum)
 {
-	if ((isSafePosition(i, j, table, rows, columns) && table[i][j] != 0)
-		&& (!visited[i][j] && path.size() <= path_length))
-	{
-		visited[i][j] = true;
-		if (i == rows-1 && j == columns-1)
-		{
+    if ((isSafePosition(i, j, table, rows, columns) && table[i][j] != 0) && (!visited[i][j] && path.size() <= path_length))
+    {
+        visited[i][j] = true;
+        if (i == rows - 1 && j == columns - 1)
+        {
             if (path.size() == path_length && sum == table[i][j])
             {
                 return true;
@@ -543,39 +585,39 @@ bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
         point.row = i;
         point.col = j;
         path.push_back(point);
-		bool up = isaPath(table, i - 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
-		if (up)
-		{
-			return true;
+        bool up = isaPath(table, i - 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+        if (up)
+        {
+            return true;
         }
-		bool left = isaPath(table, i, j - 1, visited, rows, columns, path, path_length, sum + table[i][j]);
-		if (left)
-		{
-			return true;
+        bool left = isaPath(table, i, j - 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+        if (left)
+        {
+            return true;
         }
-		bool down = isaPath(table, i + 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
-		if (down)
-		{
-			return true;
+        bool down = isaPath(table, i + 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+        if (down)
+        {
+            return true;
         }
-		bool right = isaPath(table, i, j + 1, visited, rows, columns, path, path_length, sum + table[i][j]);
-		if (right)
-		{
-			return true;
+        bool right = isaPath(table, i, j + 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+        if (right)
+        {
+            return true;
         }
         visited[i][j] = false;
         path.pop_back();
-	}
-	return false;
+    }
+    return false;
 }
 
-vector<position> findPath(int** table, int rows, int columns, int path_length)
+vector<position> findPath(int **table, int rows, int columns, int path_length)
 {
-	bool** visited = new bool*[rows];
-    for (int i=0; i<rows; i++)
+    bool **visited = new bool *[rows];
+    for (int i = 0; i < rows; i++)
     {
         visited[i] = new bool[columns];
-        for (int j=0; j<columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             visited[i][j] = false;
         }
@@ -668,13 +710,12 @@ position generate_random_position(position min_position, position max_position, 
 }
 
 bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
-                  vector<position>& path, int path_length)
+                  vector<position> &path, int path_length)
 {
-	if (isSafePosition(i, j, table, rows, columns) && path.size() <= path_length
-		&& !visited[i][j])
-	{
-		if (i == rows-1 && j == columns-1)
-		{
+    if (isSafePosition(i, j, table, rows, columns) && path.size() <= path_length && !visited[i][j])
+    {
+        if (i == rows - 1 && j == columns - 1)
+        {
             if (path.size() == path_length)
             {
                 return true;
@@ -692,7 +733,7 @@ bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int colum
         string movements[4] = {"up", "left", "down", "right"};
         shuffle_array(movements, 4);
         bool up, left, down, right;
-        for (int x=0; x<4; x++)
+        for (int x = 0; x < 4; x++)
         {
             if (movements[x] == "up")
             {
@@ -721,24 +762,24 @@ bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int colum
         }
         visited[i][j] = false;
         path.pop_back();
-	}
-	return false;
+    }
+    return false;
 }
 
 /*Create a hard map*/
 bool create_map(int **table, int rows, int columns, int path_length,
                 int max_value, int min_value, int max_block, int min_block)
 {
-    int min_path_length = rows + columns -2;
+    int min_path_length = rows + columns - 2;
     if (path_length < min_path_length)
     {
         return false;
     }
-    else 
+    else
     {
         if (path_length - min_path_length % 2 == 1)
         {
-            return false;    
+            return false;
         }
     }
     const int count_cells = rows * columns;
@@ -765,24 +806,25 @@ bool create_map(int **table, int rows, int columns, int path_length,
     }
     // generate random indexes of path
     vector<position> path_positions;
-    bool** visited = new bool*[rows];
-    for (int i=0; i<rows; i++)
+    bool **visited = new bool *[rows];
+    for (int i = 0; i < rows; i++)
     {
         visited[i] = new bool[columns];
-        for (int j=0; j<columns; j++)
+        for (int j = 0; j < columns; j++)
         {
             visited[i][j] = false;
         }
     }
-    if (!isSimplePath(table, 0, 0, visited, rows, columns, path_positions, path_length)){
+    if (!isSimplePath(table, 0, 0, visited, rows, columns, path_positions, path_length))
+    {
         return false;
     }
-    for (int i=0; i<path_positions.size(); i++)
+    for (int i = 0; i < path_positions.size(); i++)
     {
         table[path_positions[i].row][path_positions[i].col] = path_random_numbers[i];
     }
     position last_index;
-    last_index.row = rows -1;
+    last_index.row = rows - 1;
     last_index.col = columns - 1;
     path_positions.push_back(last_index);
     table[rows - 1][columns - 1] = path_sum_numbers;
@@ -825,7 +867,7 @@ bool create_map(int **table, int rows, int columns, int path_length,
             }
         }
     }
-   return true;
+    return true;
 }
 
 /*Create an easy map*/
