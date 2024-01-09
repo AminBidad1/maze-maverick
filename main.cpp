@@ -62,6 +62,7 @@ position generate_random_position(position min_position, position max_position, 
 void read_UserInfo(string &user_name);
 void read_History();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
+
 void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
@@ -320,6 +321,7 @@ void write_UserInfo(const string &user_name, const int &status, const int time_s
     outputFile.seekp(0);
     outputFile << totalGames << " " << totalWins << " " << lastWinTime << " " << totalTimeSpent << endl;
     outputFile.close();
+
 }
 
 void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent)
