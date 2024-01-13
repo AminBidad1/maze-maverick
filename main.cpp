@@ -65,6 +65,7 @@ void read_History();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
+void write_map(const string &map_name, int **table, int rows, int columns);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
              vector<position> &path, int path_length, int sum);
@@ -399,6 +400,26 @@ void write_History(const string &user_name, const string &map_name, const bool &
     {
         cerr << "Unable to open the file for writing." << endl;
     }
+}
+void write_map(const string &map_name, int **table, int rows, int columns)
+{
+    ofstream outfile("./Maps" + map_name + ".txt");
+    if (outfile.is_open())
+    {
+        outfile << rows << "\n"
+                << columns << "\n";
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                outfile << table[i][j] << " ";
+            }
+            outfile << "\n";
+        }
+        outfile.close();
+    }
+    else
+        cerr << "Unable to open file for writing.\n";
 }
 
 int start_menu()
