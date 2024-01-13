@@ -1,0 +1,15 @@
+2024-01-13 11:49:31
+User: Amin
+Map name: map3
+Time spent: 5
+Result: Lost
+2024-01-13 11:45:02
+User: Amin
+Map name: map2
+Time spent: 5
+Result: yes
+2024-01-13 11:43:28
+User: map1
+Map name: Amin
+Time spent: 3
+Result: yes
