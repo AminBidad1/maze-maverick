@@ -64,7 +64,7 @@ void read_UserInfo(string &user_name);
 void read_History();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 
-void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent);
+void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
              vector<position> &path, int path_length, int sum);
@@ -127,6 +127,11 @@ void test_play_game()
 {
     reset_terminal();
     int rows, columns, path_length, max_value, min_value, max_block, min_block;
+    string username, map_name;
+    cout << "Enter your name: ";
+    cin >> username;
+    cout << "Enter the map name: ";
+    cin >> map_name;
     cout << "Enter count of rows: ";
     cin >> rows;
     cout << "Enter count of columns: ";
@@ -161,9 +166,10 @@ void test_play_game()
     path.push_back(user_index);
     GameTimer gameTimer;
     gameTimer.start();
-    play_game(table, rows, columns, user_index, path);
+    bool result = play_game(table, rows, columns, user_index, path);
     int elapsedTimeInSeconds = gameTimer.stop();
     cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
+    write_History(username, map_name, result, elapsedTimeInSeconds);
     delete[] table;
 }
 
@@ -326,7 +332,7 @@ void write_UserInfo(const string &user_name, const int &status, const int time_s
 
 }
 
-void write_History(const string &user_name, const string &map_name, const string &result, const string &time_spent)
+void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent)
 {
     ifstream infile("./Stats/History.txt");
 
@@ -352,7 +358,10 @@ void write_History(const string &user_name, const string &map_name, const string
         outfile << "User: " << user_name << "\n";
         outfile << "Map name: " << map_name << "\n";
         outfile << "Time spent: " << time_spent << "\n";
-        outfile << "Result: " << result << "\n";
+        if (result)
+            outfile << "Result: " << "Win" << "\n";
+        else 
+            outfile << "Result: " << "Lost" << "\n";
 
         outfile << existing_content;
 
