@@ -170,6 +170,7 @@ void test_play_game()
     int elapsedTimeInSeconds = gameTimer.stop();
     cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
     write_History(username, map_name, result, elapsedTimeInSeconds);
+    write_UserInfo(username, result, elapsedTimeInSeconds);
     delete[] table;
 }
 
@@ -300,36 +301,59 @@ void read_History()
 void write_UserInfo(const string &user_name, const int &status, const int time_spent)
 {
     string filePath = "./Users/" + user_name + ".txt";
-    fstream outputFile(filePath, ios::in | ios::out);
+    ifstream outputFile(filePath);
 
-    if (!outputFile)
-    {
-        cerr << "Error: Could not open the file " << filePath << endl;
-        return;
-    }
-
-    int totalGames, totalWins;
-    string lastWinTimeStr, line;
-    time_t lastWinTime, totalTimeSpent;
-    outputFile >> totalGames >> totalWins >> lastWinTimeStr >> totalTimeSpent;
-    struct tm tm = {};
-    istringstream ss(lastWinTimeStr);
-    ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
-    lastWinTime = mktime(&tm);
-    totalGames++;
+    time_t now = time(0);
+    tm *local_time = localtime(&now);
+    char date_time[80];
 
     if (status == 1)
     {
-        totalWins++;
-        lastWinTime = time(0);
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
     }
 
-    totalTimeSpent += time_spent;
-    // Move the file cursor to the beginning
-    outputFile.seekp(0);
-    outputFile << totalGames << " " << totalWins << " " << lastWinTime << " " << totalTimeSpent << endl;
-    outputFile.close();
+    if (!outputFile)
+    {
+        ofstream first_outputFile(filePath);
+        first_outputFile << 1 << endl
+                         << status << endl;
+        if (status == 1)
+            first_outputFile << date_time << endl;
+        else
+            first_outputFile << "NULL" << endl;
+        first_outputFile << time_spent;
+    }
+    else
+    {
 
+        int totalGames, totalWins, totalTimeSpent;
+        string lastWinTime, stro;
+        outputFile >> totalGames >> totalWins;
+        outputFile.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(outputFile, lastWinTime);
+        outputFile >> totalTimeSpent;
+        totalGames++;
+        totalTimeSpent += time_spent;
+
+        if (status == 1)
+        {
+            totalWins++;
+        }
+
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
+        // Move the file cursor to the beginning
+        ofstream first_outputFile(filePath);
+        first_outputFile.seekp(0);
+        first_outputFile << totalGames << endl
+                         << totalWins << endl;
+        if (status == 1)
+            first_outputFile << date_time << endl;
+        else
+            first_outputFile << lastWinTime << endl;
+        first_outputFile << totalTimeSpent;
+    }
+
+    outputFile.close();
 }
 
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent)
@@ -359,9 +383,13 @@ void write_History(const string &user_name, const string &map_name, const bool &
         outfile << "Map name: " << map_name << "\n";
         outfile << "Time spent: " << time_spent << "\n";
         if (result)
-            outfile << "Result: " << "Win" << "\n";
-        else 
-            outfile << "Result: " << "Lost" << "\n";
+            outfile << "Result: "
+                    << "Win"
+                    << "\n";
+        else
+            outfile << "Result: "
+                    << "Lost"
+                    << "\n";
 
         outfile << existing_content;
 
