@@ -63,7 +63,8 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
-void read_existing_map();
+void read_map(const string &MapPath);
+string choose_existing_map();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
 void write_map(const string &map_name, int **table, int rows, int columns);
@@ -116,7 +117,13 @@ int main()
     }
     else if (selected_option == 5)
     {
-        read_existing_map();
+        read_map(choose_existing_map());
+        test_play_game();
+    }
+    else if (selected_option == 6)
+    {
+        string MapPath;
+        read_map(MapPath);
         test_play_game();
     }
     else if (selected_option == 10)
@@ -302,7 +309,7 @@ void read_History()
     }
 }
 
-void read_existing_map()
+string choose_existing_map()
 {
     vector<string> files;
     string FolderPath, MapPath;
@@ -318,7 +325,6 @@ void read_existing_map()
     if (files.empty())
     {
         cout << "No files found in the specified directory.\n";
-        return;
     }
 
     cout << "Existing maps:\n";
@@ -339,6 +345,11 @@ void read_existing_map()
     {
         cout << "Invalid choice.\n";
     }
+    return MapPath;
+}
+
+void read_map(const string &MapPath)
+{
     int rows, columns;
     ifstream inputfile(MapPath);
     inputfile >> rows >> columns;
