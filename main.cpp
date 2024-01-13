@@ -172,6 +172,7 @@ void test_play_game()
     cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
     write_History(username, map_name, result, elapsedTimeInSeconds);
     write_UserInfo(username, result, elapsedTimeInSeconds);
+    write_map(map_name, table, rows, columns);
     delete[] table;
 }
 
@@ -403,7 +404,8 @@ void write_History(const string &user_name, const string &map_name, const bool &
 }
 void write_map(const string &map_name, int **table, int rows, int columns)
 {
-    ofstream outfile("./Maps" + map_name + ".txt");
+    string filePath = "./Maps/" + map_name + ".txt";
+    ofstream outfile(filePath);
     if (outfile.is_open())
     {
         outfile << rows << "\n"

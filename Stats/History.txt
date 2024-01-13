@@ -1,3 +1,18 @@
+2024-01-13 17:16:11
+User: Daeijan
+Map name: mapmap1
+Time spent: 10
+Result: Lost
+2024-01-13 17:14:12
+User: HajAmou
+Map name: mapeteste2
+Time spent: 9
+Result: Lost
+2024-01-13 17:10:29
+User: AsgharKhan
+Map name: testmap1
+Time spent: 9
+Result: Win
 2024-01-13 15:59:35
 User: kk
 Map name: kk
