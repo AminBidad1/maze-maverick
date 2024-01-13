@@ -8,6 +8,7 @@
 #include <sstream>
 
 using namespace std;
+namespace fs = filesystem;
 
 #ifdef __MINGW32__
 #include <conio.h>
@@ -62,8 +63,8 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
+void read_existing_map();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
-
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
 void write_map(const string &map_name, int **table, int rows, int columns);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
@@ -115,6 +116,7 @@ int main()
     }
     else if (selected_option == 5)
     {
+        read_existing_map();
         test_play_game();
     }
     else if (selected_option == 10)
@@ -297,6 +299,61 @@ void read_History()
     else
     {
         cerr << "Unable to open the file for reading." << endl;
+    }
+}
+
+void read_existing_map()
+{
+    vector<string> files;
+    string FolderPath, MapPath;
+    FolderPath = "./Maps/";
+    for (const auto &entry : fs::directory_iterator(FolderPath))
+    {
+        if (fs::is_regular_file(entry.path()))
+        {
+            files.push_back(entry.path().filename().string());
+        }
+    }
+    reset_terminal();
+    if (files.empty())
+    {
+        cout << "No files found in the specified directory.\n";
+        return;
+    }
+
+    cout << "Existing maps:\n";
+    for (size_t i = 0; i < files.size(); ++i)
+    {
+        cout << i + 1 << ". " << files[i] << "\n";
+    }
+
+    int userChoice;
+    cout << "Choose a map (enter the number): ";
+    cin >> userChoice;
+
+    if (userChoice >= 1 && userChoice <= static_cast<int>(files.size()))
+    {
+        MapPath = FolderPath + files[userChoice - 1];
+    }
+    else
+    {
+        cout << "Invalid choice.\n";
+    }
+    int rows, columns;
+    ifstream inputfile(MapPath);
+    inputfile >> rows >> columns;
+    int **table;
+    table = new int *[rows];
+    for (int i = 0; i < rows; i++)
+    {
+        table[i] = new int[columns];
+    }
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            inputfile >> table[i][j];
+        }
     }
 }
 

@@ -1,3 +1,8 @@
+2024-01-13 19:06:44
+User: Amirali
+Map name: map1
+Time spent: 5
+Result: Lost
 2024-01-13 17:16:11
 User: Daeijan
 Map name: mapmap1
