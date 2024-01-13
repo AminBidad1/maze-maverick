@@ -8,6 +8,7 @@
 #include <sstream>
 
 using namespace std;
+namespace fs = filesystem;
 
 #ifdef __MINGW32__
 #include <conio.h>
@@ -62,9 +63,11 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
+void read_map(const string &MapPath);
+string choose_existing_map();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
-
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
+void write_map(const string &map_name, int **table, int rows, int columns);
 bool isSafePosition(int i, int j, int **table, int rows, int columns);
 bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
              vector<position> &path, int path_length, int sum);
@@ -114,6 +117,13 @@ int main()
     }
     else if (selected_option == 5)
     {
+        read_map(choose_existing_map());
+        test_play_game();
+    }
+    else if (selected_option == 6)
+    {
+        string MapPath;
+        read_map(MapPath);
         test_play_game();
     }
     else if (selected_option == 10)
@@ -170,6 +180,8 @@ void test_play_game()
     int elapsedTimeInSeconds = gameTimer.stop();
     cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
     write_History(username, map_name, result, elapsedTimeInSeconds);
+    write_UserInfo(username, result, elapsedTimeInSeconds);
+    write_map(map_name, table, rows, columns);
     delete[] table;
 }
 
@@ -297,39 +309,121 @@ void read_History()
     }
 }
 
+string choose_existing_map()
+{
+    vector<string> files;
+    string FolderPath, MapPath;
+    FolderPath = "./Maps/";
+    for (const auto &entry : fs::directory_iterator(FolderPath))
+    {
+        if (fs::is_regular_file(entry.path()))
+        {
+            files.push_back(entry.path().filename().string());
+        }
+    }
+    reset_terminal();
+    if (files.empty())
+    {
+        cout << "No files found in the specified directory.\n";
+    }
+
+    cout << "Existing maps:\n";
+    for (size_t i = 0; i < files.size(); ++i)
+    {
+        cout << i + 1 << ". " << files[i] << "\n";
+    }
+
+    int userChoice;
+    cout << "Choose a map (enter the number): ";
+    cin >> userChoice;
+
+    if (userChoice >= 1 && userChoice <= static_cast<int>(files.size()))
+    {
+        MapPath = FolderPath + files[userChoice - 1];
+    }
+    else
+    {
+        cout << "Invalid choice.\n";
+    }
+    return MapPath;
+}
+
+void read_map(const string &MapPath)
+{
+    int rows, columns;
+    ifstream inputfile(MapPath);
+    inputfile >> rows >> columns;
+    int **table;
+    table = new int *[rows];
+    for (int i = 0; i < rows; i++)
+    {
+        table[i] = new int[columns];
+    }
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            inputfile >> table[i][j];
+        }
+    }
+}
+
 void write_UserInfo(const string &user_name, const int &status, const int time_spent)
 {
     string filePath = "./Users/" + user_name + ".txt";
-    fstream outputFile(filePath, ios::in | ios::out);
+    ifstream outputFile(filePath);
 
-    if (!outputFile)
-    {
-        cerr << "Error: Could not open the file " << filePath << endl;
-        return;
-    }
-
-    int totalGames, totalWins;
-    string lastWinTimeStr, line;
-    time_t lastWinTime, totalTimeSpent;
-    outputFile >> totalGames >> totalWins >> lastWinTimeStr >> totalTimeSpent;
-    struct tm tm = {};
-    istringstream ss(lastWinTimeStr);
-    ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
-    lastWinTime = mktime(&tm);
-    totalGames++;
+    time_t now = time(0);
+    tm *local_time = localtime(&now);
+    char date_time[80];
 
     if (status == 1)
     {
-        totalWins++;
-        lastWinTime = time(0);
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
     }
 
-    totalTimeSpent += time_spent;
-    // Move the file cursor to the beginning
-    outputFile.seekp(0);
-    outputFile << totalGames << " " << totalWins << " " << lastWinTime << " " << totalTimeSpent << endl;
-    outputFile.close();
+    if (!outputFile)
+    {
+        ofstream first_outputFile(filePath);
+        first_outputFile << 1 << endl
+                         << status << endl;
+        if (status == 1)
+            first_outputFile << date_time << endl;
+        else
+            first_outputFile << "NULL" << endl;
+        first_outputFile << time_spent;
+    }
+    else
+    {
 
+        int totalGames, totalWins, totalTimeSpent;
+        string lastWinTime, stro;
+        outputFile >> totalGames >> totalWins;
+        outputFile.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(outputFile, lastWinTime);
+        outputFile >> totalTimeSpent;
+        totalGames++;
+        totalTimeSpent += time_spent;
+
+        if (status == 1)
+        {
+            totalWins++;
+        }
+
+        strftime(date_time, 80, "%Y-%m-%d %H:%M:%S", local_time);
+        // Move the file cursor to the beginning
+        ofstream first_outputFile(filePath);
+        first_outputFile.seekp(0);
+        first_outputFile << totalGames << endl
+                         << totalWins << endl;
+        if (status == 1)
+            first_outputFile << date_time << endl;
+        else
+            first_outputFile << lastWinTime << endl;
+        first_outputFile << totalTimeSpent;
+    }
+
+    outputFile.close();
 }
 
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent)
@@ -359,9 +453,13 @@ void write_History(const string &user_name, const string &map_name, const bool &
         outfile << "Map name: " << map_name << "\n";
         outfile << "Time spent: " << time_spent << "\n";
         if (result)
-            outfile << "Result: " << "Win" << "\n";
-        else 
-            outfile << "Result: " << "Lost" << "\n";
+            outfile << "Result: "
+                    << "Win"
+                    << "\n";
+        else
+            outfile << "Result: "
+                    << "Lost"
+                    << "\n";
 
         outfile << existing_content;
 
@@ -371,6 +469,27 @@ void write_History(const string &user_name, const string &map_name, const bool &
     {
         cerr << "Unable to open the file for writing." << endl;
     }
+}
+void write_map(const string &map_name, int **table, int rows, int columns)
+{
+    string filePath = "./Maps/" + map_name + ".txt";
+    ofstream outfile(filePath);
+    if (outfile.is_open())
+    {
+        outfile << rows << "\n"
+                << columns << "\n";
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                outfile << table[i][j] << " ";
+            }
+            outfile << "\n";
+        }
+        outfile.close();
+    }
+    else
+        cerr << "Unable to open file for writing.\n";
 }
 
 int start_menu()

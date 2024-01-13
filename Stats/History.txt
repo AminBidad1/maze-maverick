@@ -1,3 +1,323 @@
+2024-01-13 19:06:44
+User: Amirali
+Map name: map1
+Time spent: 5
+Result: Lost
+2024-01-13 17:16:11
+User: Daeijan
+Map name: mapmap1
+Time spent: 10
+Result: Lost
+2024-01-13 17:14:12
+User: HajAmou
+Map name: mapeteste2
+Time spent: 9
+Result: Lost
+2024-01-13 17:10:29
+User: AsgharKhan
+Map name: testmap1
+Time spent: 9
+Result: Win
+2024-01-13 15:59:35
+User: kk
+Map name: kk
+Time spent: 3
+Result: Lost
+2024-01-13 15:58:54
+User: kk
+Map name: kk
+Time spent: 2
+Result: Win
+2024-01-13 15:58:28
+User: kk
+Map name: kk
+Time spent: 3
+Result: Win
+2024-01-13 15:54:11
+User: kk
+Map name: kk
+Time spent: 1
+Result: Win
+2024-01-13 15:51:20
+User: kk
+Map name: kk
+Time spent: 1
+Result: Win
+2024-01-13 15:49:08
+User: kk
+Map name: kk
+Time spent: 1
+Result: Lost
+2024-01-13 15:47:34
+User: kk
+Map name: kk
+Time spent: 1
+Result: Win
+2024-01-13 15:46:23
+User: kk
+Map name: kk
+Time spent: 2
+Result: Win
+2024-01-13 15:45:55
+User: kk
+Map name: kk
+Time spent: 2
+Result: Win
+2024-01-13 15:42:55
+User: amou
+Map name: ammap
+Time spent: 3
+Result: Win
+2024-01-13 15:36:32
+User: haji
+Map name: a
+Time spent: 2
+Result: Win
+2024-01-13 15:32:26
+User: haji
+Map name: f
+Time spent: 1
+Result: Lost
+2024-01-13 15:31:45
+User: haji
+Map name: sd
+Time spent: 2
+Result: Lost
+2024-01-13 15:31:07
+User: haji
+Map name: 3
+Time spent: 1
+Result: Win
+2024-01-13 15:29:16
+User: haji
+Map name: a'
+Time spent: 2
+Result: Win
+2024-01-13 15:26:45
+User: haji
+Map name: ff
+Time spent: 3
+Result: Lost
+2024-01-13 15:26:02
+User: haji
+Map name: m
+Time spent: 1
+Result: Lost
+2024-01-13 15:25:28
+User: akbar
+Map name: k
+Time spent: 2
+Result: Lost
+2024-01-13 15:16:30
+User: akbar
+Map name: jj
+Time spent: 3
+Result: Win
+2024-01-13 15:15:00
+User: akbar
+Map name: ff
+Time spent: 5
+Result: Win
+2024-01-13 15:14:19
+User: akbar
+Map name: mm
+Time spent: 3
+Result: Win
+2024-01-13 15:11:31
+User: akbar
+Map name: kk
+Time spent: 4
+Result: Lost
+2024-01-13 15:11:00
+User: akbar
+Map name: kk
+Time spent: 2
+Result: Win
+2024-01-13 15:07:29
+User: akbar
+Map name: mm
+Time spent: 2
+Result: Win
+2024-01-13 15:06:59
+User: akbar
+Map name: mm
+Time spent: 3
+Result: Win
+2024-01-13 15:02:48
+User: akbar
+Map name: mm
+Time spent: 3
+Result: Win
+2024-01-13 15:00:28
+User: akbar
+Map name: jj
+Time spent: 2
+Result: Win
+2024-01-13 14:58:58
+User: akbar
+Map name: jj
+Time spent: 2
+Result: Win
+2024-01-13 14:57:33
+User: akbar
+Map name: d
+Time spent: 2
+Result: Win
+2024-01-13 14:55:48
+User: akbar
+Map name: mm
+Time spent: 4
+Result: Win
+2024-01-13 14:54:36
+User: akbar
+Map name: mm
+Time spent: 3
+Result: Win
+2024-01-13 14:52:53
+User: akbar
+Map name: mm
+Time spent: 32
+Result: Win
+2024-01-13 14:41:12
+User: akbar
+Map name: mm
+Time spent: 2
+Result: Lost
+2024-01-13 14:40:13
+User: akbar
+Map name: mj
+Time spent: 8
+Result: Win
+2024-01-13 14:38:52
+User: akbar
+Map name: mj
+Time spent: 5
+Result: Lost
+2024-01-13 14:37:51
+User: akbar
+Map name: mj
+Time spent: 2
+Result: Lost
+2024-01-13 14:37:16
+User: akbar
+Map name: mj8
+Time spent: 5
+Result: Win
+2024-01-13 14:33:54
+User: akbar
+Map name: mj5
+Time spent: 5
+Result: Lost
+2024-01-13 14:33:08
+User: akbar
+Map name: mj4
+Time spent: 5
+Result: Win
+2024-01-13 14:30:28
+User: akbar
+Map name: mj1
+Time spent: 5
+Result: Lost
+2024-01-13 14:28:58
+User: akbar
+Map name: mj
+Time spent: 4
+Result: Win
+2024-01-13 14:27:51
+User: akbar
+Map name: mmmmmmmmm
+Time spent: 5
+Result: Win
+2024-01-13 14:27:02
+User: akbar
+Map name: mm
+Time spent: 4
+Result: Win
+2024-01-13 14:25:56
+User: akbar
+Map name: mm
+Time spent: 7
+Result: Win
+2024-01-13 14:23:31
+User: akbar
+Map name: m3
+Time spent: 15
+Result: Win
+2024-01-13 14:22:41
+User: akbar
+Map name: m
+Time spent: 21
+Result: Lost
+2024-01-13 14:18:15
+User: akbar
+Map name: tes
+Time spent: 3
+Result: Win
+2024-01-13 14:16:48
+User: akbar
+Map name: mmmm
+Time spent: 5
+Result: Win
+2024-01-13 14:11:24
+User: akbar
+Map name: mm
+Time spent: 4
+Result: Lost
+2024-01-13 14:10:36
+User: akbar
+Map name: m
+Time spent: 4
+Result: Win
+2024-01-13 14:08:29
+User: akbar
+Map name: m
+Time spent: 5
+Result: Win
+2024-01-13 14:07:26
+User: akbar
+Map name: map14
+Time spent: 8
+Result: Win
+2024-01-13 14:06:34
+User: akbar
+Map name: map14
+Time spent: 10
+Result: Lost
+2024-01-13 13:51:40
+User: akbar
+Map name: map12
+Time spent: 23
+Result: Win
+2024-01-13 13:41:55
+User: akbar
+Map name: map11
+Time spent: 5
+Result: Lost
+2024-01-13 12:21:06
+User: akbar
+Map name: map10
+Time spent: 5
+Result: Lost
+2024-01-13 12:20:12
+User: akbar
+Map name: map9
+Time spent: 6
+Result: Lost
+2024-01-13 12:18:53
+User: akbar
+Map name: map8
+Time spent: 12
+Result: Lost
+2024-01-13 12:14:14
+User: akbar
+Map name: map1
+Time spent: 6
+Result: Lost
+2024-01-13 12:04:48
+User: Ali
+Map name: map1
+Time spent: 5
+Result: Lost
 2024-01-13 11:49:31
 User: Amin
 Map name: map3
