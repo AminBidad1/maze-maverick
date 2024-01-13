@@ -22,10 +22,11 @@ const int UP_KEY = 65;
 const int DOWN_KEY = 66;
 const int RIGHT_KEY = 67;
 const int LEFT_KEY = 68;
+const int ENTER_KEY = int('\n');
 int getch(void);
 #endif
 
-class GameTimer
+struct GameTimer
 {
 private:
     chrono::high_resolution_clock::time_point startTime;
@@ -162,6 +163,7 @@ void test_play_game()
     gameTimer.start();
     play_game(table, rows, columns, user_index, path);
     int elapsedTimeInSeconds = gameTimer.stop();
+    cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
     delete[] table;
 }
 
