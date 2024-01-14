@@ -1,3 +1,153 @@
+2024-01-14 17:33:01
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:57:14
+User: Amin
+Map name: 
+Time spent: 1
+Result: Win
+2024-01-14 16:55:46
+User: Amin
+Map name: 
+Time spent: 1
+Result: Win
+2024-01-14 16:49:32
+User: kk
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:45:47
+User: Ahmad
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:45:25
+User: Asghar
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:43:45
+User: Ali
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:42:52
+User: Ali
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:42:44
+User: Ali
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:40:52
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:38:58
+User: Ali
+Map name: map4
+Time spent: 3
+Result: Win
+2024-01-14 16:38:44
+User: Ali
+Map name: map4
+Time spent: 3
+Result: Win
+2024-01-14 16:38:32
+User: Ali
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:37:07
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:36:25
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:35:04
+User: Amin
+Map name: map4
+Time spent: 4
+Result: Win
+2024-01-14 16:34:25
+User: Amin
+Map name: map4
+Time spent: 6
+Result: Win
+2024-01-14 16:19:44
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:17:42
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:16:34
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Lost
+2024-01-14 16:14:59
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 16:10:56
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 16:10:32
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 14:19:19
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 14:04:39
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 14:02:42
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
+2024-01-14 13:59:12
+User: Amin
+Map name: map4
+Time spent: 4
+Result: Win
+2024-01-14 13:08:20
+User: Amin
+Map name: map4
+Time spent: 2
+Result: Win
+2024-01-14 11:33:07
+User: Amin
+Map name: map2
+Time spent: 9
+Result: Lost
+2024-01-13 20:06:08
+User: Amin
+Map name: map1
+Time spent: 6
+Result: Lost
 2024-01-13 19:06:44
 User: Amirali
 Map name: map1
@@ -317,6 +467,16 @@ Result: Lost
 User: Ali
 Map name: map1
 Time spent: 5
+Result: Lost
+2024-01-13 12:00:01
+User: Amin
+Map name: map5
+Time spent: 2
+Result: Lost
+2024-01-13 11:58:58
+User: Amin
+Map name: map4
+Time spent: 6
 Result: Lost
 2024-01-13 11:49:31
 User: Amin

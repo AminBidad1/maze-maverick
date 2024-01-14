@@ -51,10 +51,24 @@ struct position
     int row, col;
 };
 
+struct Map
+{
+    string name = "";
+    string path = "";
+};
+
+struct Board
+{
+    int** table;
+    int rows, columns;
+};
+
+
+
 void reset_terminal();
 int start_menu();
-bool create_map(int **table, int rows, int columns);
-bool create_map(int **table, int rows, int columns, int path_length,
+bool create_map(Board board);
+bool create_map(Board board, int path_length,
                 int max_value, int min_value, int max_block, int min_block);
 int generate_random(int min_value, int max_value, int *ignored_numbers, int size);
 bool isin(int list[], int number, int size);
@@ -63,26 +77,27 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
-void read_map(const string &MapPath);
-string choose_existing_map();
+void read_map(const string &MapPath, Board& board);
+Map choose_existing_map();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
-void write_map(const string &map_name, int **table, int rows, int columns);
-bool isSafePosition(int i, int j, int **table, int rows, int columns);
-bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
+void write_map(const string &map_name, Board board);
+bool isSafePosition(int i, int j, Board board);
+bool isaPath(Board, int i, int j, bool **visited,
              vector<position> &path, int path_length, int sum);
-vector<position> findPath(int **table, int rows, int columns, int path_length);
-void show_table(int **table, int rows, int columns, vector<position> path,
-                position user_index);
-bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
-                  vector<position> &path, int path_length);
-bool play_game(int **table, int rows, int columns,
-               position &current_position, vector<position> path);
-bool can_move(int **table, int rows, int columns, int i, int j,
-              vector<position> path);
+vector<position> findPath(Board board, int path_length);
+void show_table(Board board, vector<position> path, position user_index);
+bool isSimplePath(Board board, int i, int j, bool **visited, vector<position> &path, int path_length);
+bool play_game(Board board, position &current_position, vector<position> path);
+bool can_move(Board board, int i, int j, vector<position> path);
+vector<vector<string>> read_leaderboard();
+bool sort_leaderboard(vector<string> x, vector<string> y);
+void update_leaderboard(string username, bool status, int elapsed_time);
+void show_leaderboard();
 void test_create_map();
 void test_hard_create_map();
-void test_play_game();
+void test_play_game(Map map);
+void test_find_path(string map_path);
 
 template <typename T>
 void swap(T *a, T *b)
@@ -107,6 +122,7 @@ int main()
 {
     srand(time(NULL));
     int selected_option = start_menu();
+    Map map;
     if (selected_option == 2)
     {
         test_create_map();
@@ -117,58 +133,69 @@ int main()
     }
     else if (selected_option == 5)
     {
-        read_map(choose_existing_map());
-        test_play_game();
+        map = choose_existing_map();
+        test_play_game(map);
     }
     else if (selected_option == 6)
     {
-        string MapPath;
-        read_map(MapPath);
-        test_play_game();
+        reset_terminal();
+        cout << "Enter the path of map: ";
+        cin >> map.path;
+        test_play_game(map);
+    }
+    else if (selected_option == 8)
+    {
+        map = choose_existing_map();
+        test_find_path(map.path);
+    }
+    else if (selected_option == 9)
+    {
+        reset_terminal();
+        cout << "Enter the path of map: ";
+        cin >> map.path;
+        test_find_path(map.path);
     }
     else if (selected_option == 10)
     {
         read_History();
     }
+    else if (selected_option == 11)
+    {
+        show_leaderboard();
+    }
     return 0;
 }
 
-void test_play_game()
+void test_find_path(string map_path)
 {
     reset_terminal();
-    int rows, columns, path_length, max_value, min_value, max_block, min_block;
+    int rows, columns;
     string username, map_name;
+    Board board;
+    read_map(map_path, board);
+    rows = board.rows;
+    columns = board.columns;
+    vector<position> path = findPath(board, rows + columns - 2);
+    position user_index;
+    show_table(board, path, user_index);
+    if (path.empty())
+    {
+        cout << "Path does not exist!" << endl;
+    }
+}
+
+void test_play_game(Map map)
+{
+    reset_terminal();
+    int rows, columns;
+    string username, map_name;
+    Board board;
+    read_map(map.path, board);
+    rows = board.rows;
+    columns = board.columns;
     cout << "Enter your name: ";
     cin >> username;
-    cout << "Enter the map name: ";
-    cin >> map_name;
-    cout << "Enter count of rows: ";
-    cin >> rows;
-    cout << "Enter count of columns: ";
-    cin >> columns;
-    cout << "Enter path length: ";
-    cin >> path_length;
-    cout << "Enter max value of cells: ";
-    cin >> max_value;
-    cout << "Enter min value of cells: ";
-    cin >> min_value;
-    cout << "Enter max block of cells: ";
-    cin >> max_block;
-    cout << "Enter min block of cells: ";
-    cin >> min_block;
     reset_terminal();
-    int **table;
-    table = new int *[rows];
-    for (int i = 0; i < rows; i++)
-    {
-        table[i] = new int[columns];
-    }
-    if (!create_map(table, rows, columns, path_length, max_value, min_value, max_block, min_block))
-    {
-        cout << "Invalid path or Cannot create the table." << endl;
-        delete[] table;
-        return;
-    }
     vector<position> path;
     position user_index;
     user_index.row = 0;
@@ -176,53 +203,53 @@ void test_play_game()
     path.push_back(user_index);
     GameTimer gameTimer;
     gameTimer.start();
-    bool result = play_game(table, rows, columns, user_index, path);
+    bool result = play_game(board, user_index, path);
     int elapsedTimeInSeconds = gameTimer.stop();
     cout << "Elapsed time: " << elapsedTimeInSeconds << "s\n";
-    write_History(username, map_name, result, elapsedTimeInSeconds);
+    write_History(username, map.name, result, elapsedTimeInSeconds);
     write_UserInfo(username, result, elapsedTimeInSeconds);
-    write_map(map_name, table, rows, columns);
-    delete[] table;
+    update_leaderboard(username, result, elapsedTimeInSeconds);
+    delete[] board.table;
 }
 
 void test_create_map()
 {
     reset_terminal();
-    int rows, columns;
+    Board board;
     cout << "Enter count of rows: ";
-    cin >> rows;
+    cin >> board.rows;
     cout << "Enter count of columns: ";
-    cin >> columns;
+    cin >> board.columns;
+    string map_name;
+    cout << "Enter the map name: ";
+    cin >> map_name;
     reset_terminal();
-    int **table;
-    table = new int *[rows];
-    for (int i = 0; i < rows; i++)
+    board.table = new int *[board.rows];
+    for (int i = 0; i < board.rows; i++)
     {
-        table[i] = new int[columns];
+        board.table[i] = new int[board.columns];
     }
-    if (!create_map(table, rows, columns))
+    if (!create_map(board))
     {
         cout << "Can't Create" << endl;
         return;
     }
-    vector<position> path = findPath(table, rows, columns, rows + columns - 2);
+    vector<position> path;
     position user_index;
-    show_table(table, rows, columns, path, user_index);
-    if (path.empty())
-    {
-        cout << "Path does not exist!" << endl;
-    }
-    delete[] table;
+    show_table(board, path, user_index);
+    write_map(map_name, board);
+    delete[] board.table;
 }
 
 void test_hard_create_map()
 {
     reset_terminal();
-    int rows, columns, path_length, max_value, min_value, max_block, min_block;
+    int path_length, max_value, min_value, max_block, min_block;
+    Board board;
     cout << "Enter count of rows: ";
-    cin >> rows;
+    cin >> board.rows;
     cout << "Enter count of columns: ";
-    cin >> columns;
+    cin >> board.columns;
     cout << "Enter path length: ";
     cin >> path_length;
     cout << "Enter max value of cells: ";
@@ -233,27 +260,195 @@ void test_hard_create_map()
     cin >> max_block;
     cout << "Enter min block of cells: ";
     cin >> min_block;
+    string map_name;
+    cout << "Enter the map name: ";
+    cin >> map_name;
     reset_terminal();
-    int **table;
-    table = new int *[rows];
-    for (int i = 0; i < rows; i++)
+    board.table = new int *[board.rows];
+    for (int i = 0; i < board.rows; i++)
     {
-        table[i] = new int[columns];
+        board.table[i] = new int[board.columns];
     }
-    if (!create_map(table, rows, columns, path_length, max_value, min_value, max_block, min_block))
+    if (!create_map(board, path_length, max_value, min_value, max_block, min_block))
     {
         cout << "Invalid path! Cannot create the table." << endl;
-        delete[] table;
+        delete[] board.table;
         return;
     }
-    vector<position> path = findPath(table, rows, columns, path_length);
+    write_map(map_name, board);
+    vector<position> path;
     position user_index;
-    show_table(table, rows, columns, path, user_index);
-    if (path.empty())
+    show_table(board, path, user_index);
+    delete[] board.table;
+}
+
+vector<vector<string>> read_leaderboard()
+{
+    string line;
+    ifstream file("./Stats/leaderboard.txt");
+    getline(file, line);
+    // int count_user = std::stoi(line);
+    int count_user;
+    istringstream(line) >> count_user;
+    vector<vector<string>> board;
+    vector<string> temp;
+    for (int i=0; i<count_user; i++)
     {
-        cout << "Path does not exist!" << endl;
+        board.push_back(temp);
+        for (int j=0; j < 3; j++)
+        {
+            getline(file, line);
+            board[i].push_back(line);
+        }
+        
     }
-    delete[] table;
+    return board;
+}
+
+bool sort_leaderboard(vector<string> x, vector<string> y)
+{
+    int i1, i2;
+    if (x[1] != y[1])
+    {
+        return stoi(x[1]) > stoi(y[1]);
+    }
+    else
+    {
+        return stoi(x[2]) <= stoi(y[2]);
+    }
+}
+
+void update_leaderboard(string username, bool status, int elapsed_time)
+{
+    vector<vector<string>> leaderboard = read_leaderboard();
+    bool exist = false;
+    for (int i=0; i<leaderboard.size(); i++)
+    {
+        if (leaderboard[i][0] == username)
+        {
+            if (status)
+            {
+                leaderboard[i][1] = to_string(stoi(leaderboard[i][1]) + 1);
+            }
+            leaderboard[i][2] = to_string(stoi(leaderboard[i][2]) + elapsed_time);
+            exist = true;
+            break;
+        }
+    }
+    if (!exist)
+    {
+        vector<string> user_info;
+        user_info.push_back(username);
+        if (status)
+        {
+            user_info.push_back("1");
+        }
+        else{
+            user_info.push_back("0");
+        }
+        user_info.push_back(to_string(elapsed_time));
+        leaderboard.push_back(user_info);
+    }
+    sort(leaderboard.begin(), leaderboard.end(), sort_leaderboard);
+    ofstream leaderboard_file("./Stats/leaderboard.txt", ofstream::trunc);
+    leaderboard_file << to_string(leaderboard.size()) << '\n';
+    for (int i=0; i < leaderboard.size(); i++)
+    {
+        for (int j=0; j < 3; j++)
+        {
+            leaderboard_file << leaderboard[i][j] << '\n';
+        }
+    }
+    leaderboard_file.close();
+}
+
+void show_leaderboard()
+{
+    reset_terminal();
+    string line;
+    ifstream file("./Stats/leaderboard.txt");
+    getline(file, line);
+    int count_user;
+    istringstream(line) >> count_user;
+    string board[count_user+1][3];
+    board[0][0] = "Username";
+    board[0][1] = "Wins";
+    board[0][2] = "Time Spent";
+    for (int i=1; i <= count_user; i++)
+    {
+        for (int j=0; j<3; j++)
+        {
+            getline(file, line);
+            board[i][j] = line;
+        }
+        
+    }
+    int max_length = 0;
+    for (int i = 0; i <= count_user; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[i][j].length() > max_length)
+            {
+                max_length = board[i][j].length();
+            }
+        }
+    }
+    const int cell_width = max_length + 4;
+    int left_spaces, right_spaces, element_size, total_spaces;
+    for (int j = 0; j < 3; j++)
+    {
+        cout << '+' << string(cell_width, '-');
+    }
+    cout << '+' << endl;
+    for (int i = 0; i <= count_user; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            element_size = board[i][j].length();
+            total_spaces = cell_width - element_size;
+            right_spaces = total_spaces / 2;
+            left_spaces = total_spaces - right_spaces;
+            if (i == 0)
+            {
+                cout << '|';
+                cout << string(left_spaces, ' ');
+                cout << board[i][j];
+                cout << string(right_spaces, ' ');
+            }
+            else if (i == 1)
+            {
+                cout << '|';
+                cout << color::rize(string(left_spaces, ' '), "White", "Light Yellow");
+                cout << color::rize(board[i][j], "White", "Light Yellow");
+                cout << color::rize(string(right_spaces, ' '), "White", "Light Yellow");
+            }
+            else if (i == 2)
+            {
+                cout << '|';
+                cout << color::rize(string(left_spaces, ' '), "White", "Dark Gray");
+                cout << color::rize(board[i][j], "White", "Dark Gray");
+                cout << color::rize(string(right_spaces, ' '), "White", "Dark Gray");
+            }
+            else if (i == 3)
+            {
+                cout << '|';
+                cout << color::rize(string(left_spaces, ' '), "White", "Light Red");
+                cout << color::rize(board[i][j], "White", "Light Red");
+                cout << color::rize(string(right_spaces, ' '), "White", "Light Red");
+            }
+            else
+            {
+                return;
+            }
+        }
+        cout << '|' << endl;
+        for (int j = 0; j < 3; j++)
+        {
+            cout << '+' << string(cell_width, '-');
+        }
+        cout << '+' << endl;
+    }
 }
 
 void read_UserInfo(string &user_name)
@@ -281,6 +476,7 @@ void read_UserInfo(string &user_name)
 
 void read_History()
 {
+    reset_terminal();
     ifstream infile("./Stats/History.txt");
     string line;
     if (infile.is_open())
@@ -309,8 +505,9 @@ void read_History()
     }
 }
 
-string choose_existing_map()
+Map choose_existing_map()
 {
+    Map map;
     vector<string> files;
     string FolderPath, MapPath;
     FolderPath = "./Maps/";
@@ -325,6 +522,7 @@ string choose_existing_map()
     if (files.empty())
     {
         cout << "No files found in the specified directory.\n";
+        return map;
     }
 
     cout << "Existing maps:\n";
@@ -336,34 +534,36 @@ string choose_existing_map()
     int userChoice;
     cout << "Choose a map (enter the number): ";
     cin >> userChoice;
-
     if (userChoice >= 1 && userChoice <= static_cast<int>(files.size()))
     {
         MapPath = FolderPath + files[userChoice - 1];
+        string name = files[userChoice - 1];
+        name.replace(name.length()-4, 4, "");
+        map.name = name;
+        map.path = MapPath;
     }
     else
     {
         cout << "Invalid choice.\n";
     }
-    return MapPath;
+    
+    return map;
 }
 
-void read_map(const string &MapPath)
+void read_map(const string &MapPath, Board& board)
 {
-    int rows, columns;
     ifstream inputfile(MapPath);
-    inputfile >> rows >> columns;
-    int **table;
-    table = new int *[rows];
-    for (int i = 0; i < rows; i++)
+    inputfile >> board.rows >> board.columns;
+    board.table = new int *[board.rows];
+    for (int i = 0; i < board.rows; i++)
     {
-        table[i] = new int[columns];
+        board.table[i] = new int[board.columns];
     }
-    for (int i = 0; i < rows; i++)
+    for (int i = 0; i < board.rows; i++)
     {
-        for (int j = 0; j < columns; j++)
+        for (int j = 0; j < board.columns; j++)
         {
-            inputfile >> table[i][j];
+            inputfile >> board.table[i][j];
         }
     }
 }
@@ -470,8 +670,10 @@ void write_History(const string &user_name, const string &map_name, const bool &
         cerr << "Unable to open the file for writing." << endl;
     }
 }
-void write_map(const string &map_name, int **table, int rows, int columns)
+void write_map(const string &map_name, Board board)
 {
+    const int rows = board.rows;
+    const int columns = board.columns;
     string filePath = "./Maps/" + map_name + ".txt";
     ofstream outfile(filePath);
     if (outfile.is_open())
@@ -482,7 +684,7 @@ void write_map(const string &map_name, int **table, int rows, int columns)
         {
             for (int j = 0; j < columns; j++)
             {
-                outfile << table[i][j] << " ";
+                outfile << board.table[i][j] << " ";
             }
             outfile << "\n";
         }
@@ -551,12 +753,11 @@ int start_menu()
     }
 }
 
-bool can_move(int **table, int rows, int columns, int i, int j,
-              vector<position> path)
+bool can_move(Board board, int i, int j, vector<position> path)
 {
-    if (isSafePosition(i, j, table, rows, columns))
+    if (isSafePosition(i, j, board))
     {
-        if (table[i][j] == 0)
+        if (board.table[i][j] == 0)
         {
             return false;
         }
@@ -578,17 +779,18 @@ bool can_move(int **table, int rows, int columns, int i, int j,
     }
 }
 
-bool play_game(int **table, int rows, int columns,
-               position &current_position, vector<position> path)
+bool play_game(Board board, position &current_position, vector<position> path)
 {
     reset_terminal();
-    show_table(table, rows, columns, path, current_position);
-    int sum = table[0][0];
+    const int rows = board.rows;
+    const int columns = board.columns;
+    show_table(board, path, current_position);
+    int sum = board.table[0][0];
     while (true)
     {
         if (current_position.row == rows - 1 && current_position.col == columns - 1)
         {
-            if (sum == table[rows - 1][columns - 1])
+            if (sum == board.table[rows - 1][columns - 1])
             {
                 cout << color::rize(" You Won! ", "White", "Green") << endl;
                 return true;
@@ -600,55 +802,55 @@ bool play_game(int **table, int rows, int columns,
             }
         }
         if (
-            can_move(table, rows, columns, current_position.row - 1, current_position.col, path) ||
-            can_move(table, rows, columns, current_position.row + 1, current_position.col, path) ||
-            can_move(table, rows, columns, current_position.row, current_position.col - 1, path) ||
-            can_move(table, rows, columns, current_position.row, current_position.col + 1, path))
+            can_move(board, current_position.row - 1, current_position.col, path) ||
+            can_move(board, current_position.row + 1, current_position.col, path) ||
+            can_move(board, current_position.row, current_position.col - 1, path) ||
+            can_move(board, current_position.row, current_position.col + 1, path))
         {
             switch (getch())
             {
             case UP_KEY:
-                if (can_move(table, rows, columns, current_position.row - 1, current_position.col, path))
+                if (can_move(board, current_position.row - 1, current_position.col, path))
                 {
                     current_position.row -= 1;
                     path.push_back(current_position);
                     if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
-                        sum += table[current_position.row][current_position.col];
+                        sum += board.table[current_position.row][current_position.col];
                     reset_terminal();
-                    show_table(table, rows, columns, path, current_position);
+                    show_table(board, path, current_position);
                 }
                 break;
             case DOWN_KEY:
-                if (can_move(table, rows, columns, current_position.row + 1, current_position.col, path))
+                if (can_move(board, current_position.row + 1, current_position.col, path))
                 {
                     current_position.row += 1;
                     path.push_back(current_position);
                     if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
-                        sum += table[current_position.row][current_position.col];
+                        sum += board.table[current_position.row][current_position.col];
                     reset_terminal();
-                    show_table(table, rows, columns, path, current_position);
+                    show_table(board, path, current_position);
                 }
                 break;
             case LEFT_KEY:
-                if (can_move(table, rows, columns, current_position.row, current_position.col - 1, path))
+                if (can_move(board, current_position.row, current_position.col - 1, path))
                 {
                     current_position.col -= 1;
                     path.push_back(current_position);
                     if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
-                        sum += table[current_position.row][current_position.col];
+                        sum += board.table[current_position.row][current_position.col];
                     reset_terminal();
-                    show_table(table, rows, columns, path, current_position);
+                    show_table(board, path, current_position);
                 }
                 break;
             case RIGHT_KEY:
-                if (can_move(table, rows, columns, current_position.row, current_position.col + 1, path))
+                if (can_move(board, current_position.row, current_position.col + 1, path))
                 {
                     current_position.col += 1;
                     path.push_back(current_position);
                     if (!(current_position.row == rows - 1 && current_position.col == columns - 1))
-                        sum += table[current_position.row][current_position.col];
+                        sum += board.table[current_position.row][current_position.col];
                     reset_terminal();
-                    show_table(table, rows, columns, path, current_position);
+                    show_table(board, path, current_position);
                 }
                 break;
             default:
@@ -663,17 +865,19 @@ bool play_game(int **table, int rows, int columns,
     }
 }
 
-void show_table(int **table, int rows, int columns, vector<position> path,
+void show_table(Board board, vector<position> path,
                 position user_index)
 {
+    int rows = board.rows;
+    int columns = board.columns;
     int max_length = 0;
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < columns; j++)
         {
-            if (to_string(table[i][j]).length() > max_length)
+            if (to_string(board.table[i][j]).length() > max_length)
             {
-                max_length = to_string(table[i][j]).length();
+                max_length = to_string(board.table[i][j]).length();
             }
         }
     }
@@ -689,7 +893,7 @@ void show_table(int **table, int rows, int columns, vector<position> path,
     {
         for (int j = 0; j < columns; j++)
         {
-            number_size = to_string(table[i][j]).length();
+            number_size = to_string(board.table[i][j]).length();
             total_spaces = cell_width - number_size;
             right_spaces = total_spaces / 2;
             left_spaces = total_spaces - right_spaces;
@@ -699,37 +903,37 @@ void show_table(int **table, int rows, int columns, vector<position> path,
             if (i == 0 && j == 0)
             {
                 cout << color::rize(string(left_spaces, ' '), "Blue", "Red");
-                cout << color::rize(to_string(table[i][j]), "Blue", "Red");
+                cout << color::rize(to_string(board.table[i][j]), "Blue", "Red");
                 cout << color::rize(string(right_spaces, ' '), "Blue", "Red");
             }
             else if (i == rows - 1 && j == columns - 1)
             {
                 cout << color::rize(string(left_spaces, ' '), "Red", "Blue");
-                cout << color::rize(to_string(table[i][j]), "Red", "Blue");
+                cout << color::rize(to_string(board.table[i][j]), "Red", "Blue");
                 cout << color::rize(string(right_spaces, ' '), "Red", "Blue");
             }
             else if (user_index.row == i && user_index.col == j)
             {
                 cout << color::rize(string(left_spaces, ' '), "White", "Green");
-                cout << color::rize(to_string(table[i][j]), "White", "Green");
+                cout << color::rize(to_string(board.table[i][j]), "White", "Green");
                 cout << color::rize(string(right_spaces, ' '), "White", "Green");
             }
-            else if (table[i][j] == 0)
+            else if (board.table[i][j] == 0)
             {
                 cout << color::rize(string(left_spaces, ' '), "Red", "Light Yellow");
-                cout << color::rize(to_string(table[i][j]), "Red", "Light Yellow");
+                cout << color::rize(to_string(board.table[i][j]), "Red", "Light Yellow");
                 cout << color::rize(string(right_spaces, ' '), "Red", "Light Yellow");
             }
             else if (isin_position(path, point))
             {
                 cout << color::rize(string(left_spaces, ' '), "Red", "Light Blue");
-                cout << color::rize(to_string(table[i][j]), "Red", "Light Blue");
+                cout << color::rize(to_string(board.table[i][j]), "Red", "Light Blue");
                 cout << color::rize(string(right_spaces, ' '), "Red", "Light Blue");
             }
             else
             {
                 cout << string(left_spaces, ' ');
-                cout << to_string(table[i][j]);
+                cout << to_string(board.table[i][j]);
                 cout << string(right_spaces, ' ');
             }
         }
@@ -742,22 +946,24 @@ void show_table(int **table, int rows, int columns, vector<position> path,
     }
 }
 
-bool isSafePosition(int i, int j, int **table, int rows, int columns)
+bool isSafePosition(int i, int j, Board board)
 {
-    if (i >= 0 && i < rows && j >= 0 && j < columns)
+    if (i >= 0 && i < board.rows && j >= 0 && j < board.columns)
         return true;
     return false;
 }
 
-bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
+bool isaPath(Board board, int i, int j, bool **visited,
              vector<position> &path, int path_length, int sum)
 {
-    if ((isSafePosition(i, j, table, rows, columns) && table[i][j] != 0) && (!visited[i][j] && path.size() <= path_length))
+    const int rows = board.rows;
+    const int columns = board.columns;
+    if ((isSafePosition(i, j, board) && board.table[i][j] != 0) && (!visited[i][j] && path.size() <= path_length))
     {
         visited[i][j] = true;
         if (i == rows - 1 && j == columns - 1)
         {
-            if (path.size() == path_length && sum == table[i][j])
+            if (path.size() == path_length && sum == board.table[i][j])
             {
                 return true;
             }
@@ -771,22 +977,22 @@ bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
         point.row = i;
         point.col = j;
         path.push_back(point);
-        bool up = isaPath(table, i - 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+        bool up = isaPath(board, i - 1, j, visited, path, path_length, sum + board.table[i][j]);
         if (up)
         {
             return true;
         }
-        bool left = isaPath(table, i, j - 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+        bool left = isaPath(board, i, j - 1, visited, path, path_length, sum + board.table[i][j]);
         if (left)
         {
             return true;
         }
-        bool down = isaPath(table, i + 1, j, visited, rows, columns, path, path_length, sum + table[i][j]);
+        bool down = isaPath(board, i + 1, j, visited, path, path_length, sum + board.table[i][j]);
         if (down)
         {
             return true;
         }
-        bool right = isaPath(table, i, j + 1, visited, rows, columns, path, path_length, sum + table[i][j]);
+        bool right = isaPath(board, i, j + 1, visited, path, path_length, sum + board.table[i][j]);
         if (right)
         {
             return true;
@@ -797,20 +1003,20 @@ bool isaPath(int **table, int i, int j, bool **visited, int rows, int columns,
     return false;
 }
 
-vector<position> findPath(int **table, int rows, int columns, int path_length)
+vector<position> findPath(Board board, int path_length)
 {
-    bool **visited = new bool *[rows];
-    for (int i = 0; i < rows; i++)
+    bool **visited = new bool *[board.rows];
+    for (int i = 0; i < board.rows; i++)
     {
-        visited[i] = new bool[columns];
-        for (int j = 0; j < columns; j++)
+        visited[i] = new bool[board.columns];
+        for (int j = 0; j < board.columns; j++)
         {
             visited[i][j] = false;
         }
     }
     vector<position> path;
     vector<position> empty;
-    if (isaPath(table, 0, 0, visited, rows, columns, path, path_length, 0))
+    if (isaPath(board, 0, 0, visited, path, path_length, 0))
     {
         return path;
     }
@@ -895,10 +1101,12 @@ position generate_random_position(position min_position, position max_position, 
     } while (true);
 }
 
-bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int columns,
+bool isSimplePath(Board board, int i, int j, bool **visited, 
                   vector<position> &path, int path_length)
 {
-    if (isSafePosition(i, j, table, rows, columns) && path.size() <= path_length && !visited[i][j])
+    const int rows = board.rows;
+    const int columns = board.columns;
+    if (isSafePosition(i, j, board) && path.size() <= path_length && !visited[i][j])
     {
         if (i == rows - 1 && j == columns - 1)
         {
@@ -923,25 +1131,25 @@ bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int colum
         {
             if (movements[x] == "up")
             {
-                up = isSimplePath(table, i - 1, j, visited, rows, columns, path, path_length);
+                up = isSimplePath(board, i - 1, j, visited, path, path_length);
                 if (up)
                     return true;
             }
             else if (movements[x] == "left")
             {
-                left = isSimplePath(table, i, j - 1, visited, rows, columns, path, path_length);
+                left = isSimplePath(board, i, j - 1, visited, path, path_length);
                 if (left)
                     return true;
             }
             else if (movements[x] == "down")
             {
-                down = isSimplePath(table, i + 1, j, visited, rows, columns, path, path_length);
+                down = isSimplePath(board, i + 1, j, visited, path, path_length);
                 if (down)
                     return true;
             }
             else if (movements[x] == "right")
             {
-                right = isSimplePath(table, i, j + 1, visited, rows, columns, path, path_length);
+                right = isSimplePath(board, i, j + 1, visited, path, path_length);
                 if (right)
                     return true;
             }
@@ -953,9 +1161,11 @@ bool isSimplePath(int **table, int i, int j, bool **visited, int rows, int colum
 }
 
 /*Create a hard map*/
-bool create_map(int **table, int rows, int columns, int path_length,
+bool create_map(Board board, int path_length,
                 int max_value, int min_value, int max_block, int min_block)
 {
+    const int rows = board.rows;
+    const int columns = board.columns;
     int min_path_length = rows + columns - 2;
     if (path_length < min_path_length)
     {
@@ -1001,19 +1211,19 @@ bool create_map(int **table, int rows, int columns, int path_length,
             visited[i][j] = false;
         }
     }
-    if (!isSimplePath(table, 0, 0, visited, rows, columns, path_positions, path_length))
+    if (!isSimplePath(board, 0, 0, visited, path_positions, path_length))
     {
         return false;
     }
     for (int i = 0; i < path_positions.size(); i++)
     {
-        table[path_positions[i].row][path_positions[i].col] = path_random_numbers[i];
+        board.table[path_positions[i].row][path_positions[i].col] = path_random_numbers[i];
     }
     position last_index;
     last_index.row = rows - 1;
     last_index.col = columns - 1;
     path_positions.push_back(last_index);
-    table[rows - 1][columns - 1] = path_sum_numbers;
+    board.table[rows - 1][columns - 1] = path_sum_numbers;
     // generate random block indexes
     int count_block = generate_random(min_block, max_block, empty_array, 0);
     position blocks[count_block + path_length + 1];
@@ -1031,7 +1241,7 @@ bool create_map(int **table, int rows, int columns, int path_length,
     for (int i = path_length + 1; i < count_block + path_length + 1; i++)
     {
         blocks[i] = generate_random_position(min_position, max_position, blocks, i);
-        table[blocks[i].row][blocks[i].col] = 100000000;
+        board.table[blocks[i].row][blocks[i].col] = 100000000;
     }
     // generate other numbers of table
     for (int i = 0; i < rows; i++)
@@ -1042,13 +1252,13 @@ bool create_map(int **table, int rows, int columns, int path_length,
             temp_point.col = j;
             if (!isin_position(path_positions, temp_point))
             {
-                if (table[i][j] != 100000000)
+                if (board.table[i][j] != 100000000)
                 {
-                    table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
+                    board.table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
                 }
                 else
                 {
-                    table[i][j] = 0;
+                    board.table[i][j] = 0;
                 }
             }
         }
@@ -1057,15 +1267,15 @@ bool create_map(int **table, int rows, int columns, int path_length,
 }
 
 /*Create an easy map*/
-bool create_map(int **table, int rows, int columns)
+bool create_map(Board board)
 {
     // initial values
-    const int path_length = rows + columns - 2;
+    const int path_length = board.rows + board.columns - 2;
     const int max_value = 3;
     const int min_value = -3;
     int max_block = 5;
     int min_block = 2;
-    const int count_cells = rows * columns;
+    const int count_cells = board.rows * board.columns;
     if (path_length + min_block >= count_cells)
     {
         return false;
@@ -1087,8 +1297,8 @@ bool create_map(int **table, int rows, int columns)
         }
     }
     // generate random movements of path
-    int down_positions[rows - 1];
-    for (int i = 0; i < rows - 1; i++)
+    int down_positions[board.rows - 1];
+    for (int i = 0; i < board.rows - 1; i++)
     {
         down_positions[i] = generate_random(0, path_length - 1, down_positions, i);
     }
@@ -1096,27 +1306,27 @@ bool create_map(int **table, int rows, int columns)
     position path_positions[path_length + 1];
     int row_index = 0;
     int col_index = 0;
-    table[0][0] = path_random_numbers[0];
+    board.table[0][0] = path_random_numbers[0];
     path_positions[0].row = 0;
     path_positions[0].col = 0;
     for (int i = 1; i < path_length; i++)
     {
-        if (isin(down_positions, i - 1, rows - 1))
+        if (isin(down_positions, i - 1, board.rows - 1))
         {
             row_index++;
-            table[row_index][col_index] = path_random_numbers[i];
+            board.table[row_index][col_index] = path_random_numbers[i];
         }
         else
         {
             col_index++;
-            table[row_index][col_index] = path_random_numbers[i];
+            board.table[row_index][col_index] = path_random_numbers[i];
         }
         path_positions[i].row = row_index;
         path_positions[i].col = col_index;
     }
-    path_positions[path_length].row = rows - 1;
-    path_positions[path_length].col = columns - 1;
-    table[rows - 1][columns - 1] = path_sum_numbers;
+    path_positions[path_length].row = board.rows - 1;
+    path_positions[path_length].col = board.columns - 1;
+    board.table[board.rows - 1][board.columns - 1] = path_sum_numbers;
     // generate random block indexes
     int empty_array[0] = {};
     int count_block = generate_random(min_block, max_block, empty_array, 0);
@@ -1130,29 +1340,29 @@ bool create_map(int **table, int rows, int columns)
     min_position.row = 0;
     min_position.col = 0;
     position max_position;
-    max_position.row = rows - 1;
-    max_position.col = columns - 1;
+    max_position.row = board.rows - 1;
+    max_position.col = board.columns - 1;
     for (int i = path_length + 1; i < count_block + path_length + 1; i++)
     {
         blocks[i] = generate_random_position(min_position, max_position, blocks, i);
-        table[blocks[i].row][blocks[i].col] = 1000000000;
+        board.table[blocks[i].row][blocks[i].col] = 1000000000;
     }
     // generate other numbers of table
-    for (int i = 0; i < rows; i++)
+    for (int i = 0; i < board.rows; i++)
     {
-        for (int j = 0; j < columns; j++)
+        for (int j = 0; j < board.columns; j++)
         {
             temp_point.row = i;
             temp_point.col = j;
             if (!isin_position(path_positions, temp_point, path_length + 1))
             {
-                if (table[i][j] != 1000000000)
+                if (board.table[i][j] != 1000000000)
                 {
-                    table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
+                    board.table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
                 }
                 else
                 {
-                    table[i][j] = 0;
+                    board.table[i][j] = 0;
                 }
             }
         }
