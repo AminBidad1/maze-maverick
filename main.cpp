@@ -64,7 +64,7 @@ struct Board
 };
 
 
-
+void return_menu();
 void reset_terminal();
 int start_menu();
 bool create_map(Board board);
@@ -94,6 +94,7 @@ vector<vector<string>> read_leaderboard();
 bool sort_leaderboard(vector<string> x, vector<string> y);
 void update_leaderboard(string username, bool status, int elapsed_time);
 void show_leaderboard();
+void show_user_info();
 void test_create_map();
 void test_hard_create_map();
 void test_play_game(Map map);
@@ -118,52 +119,73 @@ void shuffle_array(T inputs[], int count)
     }
 }
 
+void return_menu()
+{
+    int selected_option;
+    Map map;
+    while (true)
+    {
+        selected_option = start_menu();
+        if (selected_option == 2)
+        {
+            test_create_map();
+        }
+        else if (selected_option == 3)
+        {
+            test_hard_create_map();
+        }
+        else if (selected_option == 5)
+        {
+            map = choose_existing_map();
+            test_play_game(map);
+        }
+        else if (selected_option == 6)
+        {
+            reset_terminal();
+            cout << "Enter the path of map: ";
+            cin >> map.path;
+            test_play_game(map);
+        }
+        else if (selected_option == 8)
+        {
+            map = choose_existing_map();
+            test_find_path(map.path);
+        }
+        else if (selected_option == 9)
+        {
+            reset_terminal();
+            cout << "Enter the path of map: ";
+            cin >> map.path;
+            test_find_path(map.path);
+        }
+        else if (selected_option == 10)
+        {
+            read_History();
+        }
+        else if (selected_option == 11)
+        {
+            show_leaderboard();
+        }
+        else if (selected_option == 12)
+        {
+            show_user_info();
+        }
+        else if (selected_option == 13)
+        {
+            return;
+        }
+        cout << "Press an arrow to back to menu..." << endl;
+        int temp;
+        temp = getch();
+        temp = getch();
+    }
+}
+
+
 int main()
 {
     srand(time(NULL));
-    int selected_option = start_menu();
-    Map map;
-    if (selected_option == 2)
-    {
-        test_create_map();
-    }
-    else if (selected_option == 3)
-    {
-        test_hard_create_map();
-    }
-    else if (selected_option == 5)
-    {
-        map = choose_existing_map();
-        test_play_game(map);
-    }
-    else if (selected_option == 6)
-    {
-        reset_terminal();
-        cout << "Enter the path of map: ";
-        cin >> map.path;
-        test_play_game(map);
-    }
-    else if (selected_option == 8)
-    {
-        map = choose_existing_map();
-        test_find_path(map.path);
-    }
-    else if (selected_option == 9)
-    {
-        reset_terminal();
-        cout << "Enter the path of map: ";
-        cin >> map.path;
-        test_find_path(map.path);
-    }
-    else if (selected_option == 10)
-    {
-        read_History();
-    }
-    else if (selected_option == 11)
-    {
-        show_leaderboard();
-    }
-    return 0;
+    return_menu();
 }
 
 void test_find_path(string map_path)
@@ -280,6 +302,15 @@ void test_hard_create_map()
     position user_index;
     show_table(board, path, user_index);
     delete[] board.table;
+}
+
+void show_user_info()
+{
+    reset_terminal();
+    string username;
+    cout << "Enter your username: ";
+    cin >> username;
+    read_UserInfo(username);
 }
 
 vector<vector<string>> read_leaderboard()
@@ -698,7 +729,7 @@ int start_menu()
 {
     reset_terminal();
     int selected_option = 2;
-    const string options[12] = {
+    const string options[13] = {
         "1. Create a New Map",
         "   1.1 Easy",
         "   1.2 Hard",
@@ -710,10 +741,11 @@ int start_menu()
         "   3.2 Import a Custom Map",
         "4. History",
         "5. Leaderboard",
-        "6. Exit"};
+        "6. User Info",
+        "7. Exit"};
     while (true)
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 13; i++)
         {
             if (selected_option == i + 1)
             {
@@ -745,8 +777,8 @@ int start_menu()
         default:
             break;
         }
-        if (selected_option > 12)
-            selected_option = 12;
+        if (selected_option > 13)
+            selected_option = 13;
         else if (selected_option <= 1)
             selected_option = 2;
         reset_terminal();

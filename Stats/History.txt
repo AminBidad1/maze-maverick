@@ -1,3 +1,13 @@
+2024-01-17 16:23:07
+User: Amin
+Map name: map10
+Time spent: 7
+Result: Lost
+2024-01-17 13:34:00
+User: Amin
+Map name: map4
+Time spent: 1
+Result: Win
 2024-01-14 17:33:01
 User: Amin
 Map name: map4
