@@ -59,11 +59,9 @@ struct Map
 
 struct Board
 {
-    int** table;
+    int **table;
     int rows, columns;
 };
-
-
 
 void reset_terminal();
 int start_menu();
@@ -77,7 +75,7 @@ bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
 void read_UserInfo(string &user_name);
 void read_History();
-void read_map(const string &MapPath, Board& board);
+void read_map(const string &MapPath, Board &board);
 Map choose_existing_map();
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
@@ -292,15 +290,14 @@ vector<vector<string>> read_leaderboard()
     istringstream(line) >> count_user;
     vector<vector<string>> board;
     vector<string> temp;
-    for (int i=0; i<count_user; i++)
+    for (int i = 0; i < count_user; i++)
     {
         board.push_back(temp);
-        for (int j=0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
         {
             getline(file, line);
             board[i].push_back(line);
         }
-        
     }
     return board;
 }
@@ -322,7 +319,7 @@ void update_leaderboard(string username, bool status, int elapsed_time)
 {
     vector<vector<string>> leaderboard = read_leaderboard();
     bool exist = false;
-    for (int i=0; i<leaderboard.size(); i++)
+    for (int i = 0; i < leaderboard.size(); i++)
     {
         if (leaderboard[i][0] == username)
         {
@@ -343,7 +340,8 @@ void update_leaderboard(string username, bool status, int elapsed_time)
         {
             user_info.push_back("1");
         }
-        else{
+        else
+        {
             user_info.push_back("0");
         }
         user_info.push_back(to_string(elapsed_time));
@@ -352,9 +350,9 @@ void update_leaderboard(string username, bool status, int elapsed_time)
     sort(leaderboard.begin(), leaderboard.end(), sort_leaderboard);
     ofstream leaderboard_file("./Stats/leaderboard.txt", ofstream::trunc);
     leaderboard_file << to_string(leaderboard.size()) << '\n';
-    for (int i=0; i < leaderboard.size(); i++)
+    for (int i = 0; i < leaderboard.size(); i++)
     {
-        for (int j=0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
         {
             leaderboard_file << leaderboard[i][j] << '\n';
         }
@@ -370,18 +368,17 @@ void show_leaderboard()
     getline(file, line);
     int count_user;
     istringstream(line) >> count_user;
-    string board[count_user+1][3];
+    string board[count_user + 1][3];
     board[0][0] = "Username";
     board[0][1] = "Wins";
     board[0][2] = "Time Spent";
-    for (int i=1; i <= count_user; i++)
+    for (int i = 1; i <= count_user; i++)
     {
-        for (int j=0; j<3; j++)
+        for (int j = 0; j < 3; j++)
         {
             getline(file, line);
             board[i][j] = line;
         }
-        
     }
     int max_length = 0;
     for (int i = 0; i <= count_user; i++)
@@ -510,47 +507,76 @@ Map choose_existing_map()
     Map map;
     vector<string> files;
     string FolderPath, MapPath;
+    int NumberOfMaps = 0;
     FolderPath = "./Maps/";
     for (const auto &entry : fs::directory_iterator(FolderPath))
     {
         if (fs::is_regular_file(entry.path()))
         {
             files.push_back(entry.path().filename().string());
+            NumberOfMaps++;
         }
     }
+    string maps[NumberOfMaps];
+    for (int i = 0; i < NumberOfMaps; i++)
+    {
+        maps[i] = to_string(i + 1) + ". " + files[i];
+    }
+
     reset_terminal();
     if (files.empty())
     {
         cout << "No files found in the specified directory.\n";
         return map;
     }
-
-    cout << "Existing maps:\n";
-    for (size_t i = 0; i < files.size(); ++i)
-    {
-        cout << i + 1 << ". " << files[i] << "\n";
-    }
-
-    int userChoice;
-    cout << "Choose a map (enter the number): ";
-    cin >> userChoice;
-    if (userChoice >= 1 && userChoice <= static_cast<int>(files.size()))
-    {
-        MapPath = FolderPath + files[userChoice - 1];
-        string name = files[userChoice - 1];
-        name.replace(name.length()-4, 4, "");
-        map.name = name;
-        map.path = MapPath;
-    }
     else
     {
-        cout << "Invalid choice.\n";
+        int userChoice = 1;
+        while (true)
+        {
+            cout << "Existing maps:\n";
+            for (size_t i = 0; i < files.size(); ++i)
+            {
+                if (userChoice == i + 1)
+                {
+                    cout << color::rize(maps[i], "Red", "Blue") << endl;
+                }
+                else
+                {
+                    cout << maps[i] << endl;
+                }
+            }
+            string name;
+            switch (getch())
+            {
+            case UP_KEY:
+                userChoice--;
+                break;
+            case DOWN_KEY:
+                userChoice++;
+                break;
+            case ENTER_KEY:
+                MapPath = FolderPath + files[userChoice - 1];
+                name = files[userChoice - 1];
+                name.replace(name.length() - 4, 4, "");
+                map.name = name;
+                map.path = MapPath;
+                return map;
+            default:
+                break;
+            }
+            if (userChoice > NumberOfMaps)
+                userChoice = NumberOfMaps;
+            else if (userChoice <= 1)
+                userChoice = 1;
+            reset_terminal();
+        }
     }
-    
+
     return map;
 }
 
-void read_map(const string &MapPath, Board& board)
+void read_map(const string &MapPath, Board &board)
 {
     ifstream inputfile(MapPath);
     inputfile >> board.rows >> board.columns;
@@ -651,7 +677,7 @@ void write_History(const string &user_name, const string &map_name, const bool &
         outfile << date_time << "\n";
         outfile << "User: " << user_name << "\n";
         outfile << "Map name: " << map_name << "\n";
-        outfile << "Time spent: " << time_spent << "\n";
+        outfile << "Time spent: " << time_spent << "s\n";
         if (result)
             outfile << "Result: "
                     << "Win"
@@ -1101,7 +1127,7 @@ position generate_random_position(position min_position, position max_position, 
     } while (true);
 }
 
-bool isSimplePath(Board board, int i, int j, bool **visited, 
+bool isSimplePath(Board board, int i, int j, bool **visited,
                   vector<position> &path, int path_length)
 {
     const int rows = board.rows;
