@@ -73,7 +73,7 @@ bool isin(int list[], int number, int size);
 bool isin_position(position positions[], position point, int size);
 bool isin_position(vector<position> positions, position point);
 position generate_random_position(position min_position, position max_position, position *points, int size);
-void read_UserInfo(string &user_name);
+void read_UserInfo();
 void read_History();
 void read_map(const string &MapPath, Board &board);
 Map choose_existing_map();
@@ -158,6 +158,10 @@ int main()
         read_History();
     }
     else if (selected_option == 11)
+    {
+        read_UserInfo();
+    }
+    else if (selected_option == 12)
     {
         show_leaderboard();
     }
@@ -448,8 +452,12 @@ void show_leaderboard()
     }
 }
 
-void read_UserInfo(string &user_name)
+void read_UserInfo()
 {
+    reset_terminal();
+    cout << "Enter user name: \n";
+    string user_name;
+    cin >> user_name;
     ifstream infile("./Users/" + user_name + ".txt");
     string line;
     if (infile.is_open())
@@ -724,7 +732,7 @@ int start_menu()
 {
     reset_terminal();
     int selected_option = 2;
-    const string options[12] = {
+    const string options[13] = {
         "1. Create a New Map",
         "   1.1 Easy",
         "   1.2 Hard",
@@ -735,11 +743,12 @@ int start_menu()
         "   3.1 Choose from Existing Maps",
         "   3.2 Import a Custom Map",
         "4. History",
-        "5. Leaderboard",
-        "6. Exit"};
+        "5. User Info",
+        "6. Leaderboard",
+        "7. Exit"};
     while (true)
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 13; i++)
         {
             if (selected_option == i + 1)
             {
@@ -771,8 +780,8 @@ int start_menu()
         default:
             break;
         }
-        if (selected_option > 12)
-            selected_option = 12;
+        if (selected_option > 13)
+            selected_option = 13;
         else if (selected_option <= 1)
             selected_option = 2;
         reset_terminal();
