@@ -94,7 +94,6 @@ vector<vector<string>> read_leaderboard();
 bool sort_leaderboard(vector<string> x, vector<string> y);
 void update_leaderboard(string username, bool status, int elapsed_time);
 void show_leaderboard();
-void show_user_info();
 void test_create_map();
 void test_hard_create_map();
 void test_play_game(Map map);
@@ -168,7 +167,7 @@ void return_menu()
         }
         else if (selected_option == 12)
         {
-            show_user_info();
+            read_UserInfo();
         }
         else if (selected_option == 13)
         {
@@ -302,12 +301,6 @@ void test_hard_create_map()
     position user_index;
     show_table(board, path, user_index);
     delete[] board.table;
-}
-
-void show_user_info()
-{
-    reset_terminal();
-    read_UserInfo();
 }
 
 vector<vector<string>> read_leaderboard()
