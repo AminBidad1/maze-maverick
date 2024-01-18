@@ -63,6 +63,8 @@ struct Board
     int rows, columns;
 };
 
+
+void return_menu();
 void reset_terminal();
 int start_menu();
 bool create_map(Board board);
@@ -116,56 +118,73 @@ void shuffle_array(T inputs[], int count)
     }
 }
 
+void return_menu()
+{
+    int selected_option;
+    Map map;
+    while (true)
+    {
+        selected_option = start_menu();
+        if (selected_option == 2)
+        {
+            test_create_map();
+        }
+        else if (selected_option == 3)
+        {
+            test_hard_create_map();
+        }
+        else if (selected_option == 5)
+        {
+            map = choose_existing_map();
+            test_play_game(map);
+        }
+        else if (selected_option == 6)
+        {
+            reset_terminal();
+            cout << "Enter the path of map: ";
+            cin >> map.path;
+            test_play_game(map);
+        }
+        else if (selected_option == 8)
+        {
+            map = choose_existing_map();
+            test_find_path(map.path);
+        }
+        else if (selected_option == 9)
+        {
+            reset_terminal();
+            cout << "Enter the path of map: ";
+            cin >> map.path;
+            test_find_path(map.path);
+        }
+        else if (selected_option == 10)
+        {
+            read_History();
+        }
+        else if (selected_option == 11)
+        {
+            show_leaderboard();
+        }
+        else if (selected_option == 12)
+        {
+            read_UserInfo();
+        }
+        else if (selected_option == 13)
+        {
+            return;
+        }
+        cout << "Press an arrow to back to menu..." << endl;
+        int temp;
+        temp = getch();
+        temp = getch();
+    }
+}
+
+
 int main()
 {
     srand(time(NULL));
-    int selected_option = start_menu();
-    Map map;
-    if (selected_option == 2)
-    {
-        test_create_map();
-    }
-    else if (selected_option == 3)
-    {
-        test_hard_create_map();
-    }
-    else if (selected_option == 5)
-    {
-        map = choose_existing_map();
-        test_play_game(map);
-    }
-    else if (selected_option == 6)
-    {
-        reset_terminal();
-        cout << "Enter the path of map: ";
-        cin >> map.path;
-        test_play_game(map);
-    }
-    else if (selected_option == 8)
-    {
-        map = choose_existing_map();
-        test_find_path(map.path);
-    }
-    else if (selected_option == 9)
-    {
-        reset_terminal();
-        cout << "Enter the path of map: ";
-        cin >> map.path;
-        test_find_path(map.path);
-    }
-    else if (selected_option == 10)
-    {
-        read_History();
-    }
-    else if (selected_option == 11)
-    {
-        read_UserInfo();
-    }
-    else if (selected_option == 12)
-    {
-        show_leaderboard();
-    }
-    return 0;
+    return_menu();
 }
 
 void test_find_path(string map_path)
@@ -294,10 +313,10 @@ vector<vector<string>> read_leaderboard()
     istringstream(line) >> count_user;
     vector<vector<string>> board;
     vector<string> temp;
-    for (int i = 0; i < count_user; i++)
+    for (int i=0; i<count_user; i++)
     {
         board.push_back(temp);
-        for (int j = 0; j < 3; j++)
+        for (int j=0; j < 3; j++)
         {
             getline(file, line);
             board[i].push_back(line);
@@ -455,7 +474,7 @@ void show_leaderboard()
 void read_UserInfo()
 {
     reset_terminal();
-    cout << "Enter user name: \n";
+    cout << "Enter user name: ";
     string user_name;
     cin >> user_name;
     ifstream infile("./Users/" + user_name + ".txt");
@@ -743,8 +762,8 @@ int start_menu()
         "   3.1 Choose from Existing Maps",
         "   3.2 Import a Custom Map",
         "4. History",
-        "5. User Info",
-        "6. Leaderboard",
+        "5. Leaderboard",
+        "6. User Info",
         "7. Exit"};
     while (true)
     {
