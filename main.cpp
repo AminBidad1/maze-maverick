@@ -48,7 +48,7 @@ public:
 
 struct position
 {
-    int row, col;
+    unsigned int row, col;
 };
 
 struct Map
@@ -60,11 +60,11 @@ struct Map
 struct Board
 {
     int **table;
-    int rows, columns;
+    unsigned int rows, columns;
 };
 
 
-void return_menu();
+void show_menu();
 void reset_terminal();
 int start_menu();
 bool create_map(Board board);
@@ -90,14 +90,15 @@ void show_table(Board board, vector<position> path, position user_index);
 bool isSimplePath(Board board, int i, int j, bool **visited, vector<position> &path, int path_length);
 bool play_game(Board board, position &current_position, vector<position> path);
 bool can_move(Board board, int i, int j, vector<position> path);
+bool is_number(string input, bool is_unsigned);
 vector<vector<string>> read_leaderboard();
-bool sort_leaderboard(vector<string> x, vector<string> y);
+bool sort_leaderboard(vector<string> user1, vector<string> user2);
 void update_leaderboard(string username, bool status, int elapsed_time);
 void show_leaderboard();
-void test_create_map();
-void test_hard_create_map();
-void test_play_game(Map map);
-void test_find_path(string map_path);
+void run_create_map();
+void run_hard_create_map();
+void run_play_game(Map map);
+void run_find_path(string map_path);
 
 template <typename T>
 void swap(T *a, T *b)
@@ -118,65 +119,95 @@ void shuffle_array(T inputs[], int count)
     }
 }
 
-void return_menu()
+void show_menu()
 {
     int selected_option;
     Map map;
+    int input_key;
     while (true)
     {
         selected_option = start_menu();
-        if (selected_option == 2)
+        if (selected_option == 2) // Create Easy map
         {
-            test_create_map();
+            try
+            {
+                run_create_map();
+            }
+            catch(int)
+            {
+                cerr << color::rize("You don't type a valid number!", "Red") << endl;
+            }
         }
-        else if (selected_option == 3)
+        else if (selected_option == 3) // Create hard map
         {
-            test_hard_create_map();
+            try
+            {
+                run_hard_create_map();
+            }
+            catch(int)
+            {
+                cerr << color::rize("You don't type a valid number!", "Red") << endl;
+            }
         }
-        else if (selected_option == 5)
+        else if (selected_option == 5) // PlayGround: Choose from Existing Maps
         {
             map = choose_existing_map();
-            test_play_game(map);
+            run_play_game(map);
         }
-        else if (selected_option == 6)
+        else if (selected_option == 6) // PlayGround: Import a Custom Map
         {
             reset_terminal();
             cout << "Enter the path of map: ";
             cin >> map.path;
-            test_play_game(map);
+            try
+            {
+                run_play_game(map);
+            }
+            catch(...)
+            {
+                cerr << color::rize("Something Wrong in map path", "Red") << endl;
+            }
         }
-        else if (selected_option == 8)
+        else if (selected_option == 8) // Solve a maze: Choose from Existing Maps
         {
             map = choose_existing_map();
-            test_find_path(map.path);
+            run_find_path(map.path);
         }
-        else if (selected_option == 9)
+        else if (selected_option == 9) // Solve a maze: Import a Custom Map
         {
             reset_terminal();
             cout << "Enter the path of map: ";
             cin >> map.path;
-            test_find_path(map.path);
+            try
+            {
+                run_find_path(map.path);
+            }
+            catch(...)
+            {
+                cerr << color::rize("Something Wrong in map path", "Red") << endl;
+            }
         }
-        else if (selected_option == 10)
+        else if (selected_option == 10) // History
         {
             read_History();
         }
-        else if (selected_option == 11)
+        else if (selected_option == 11) // Leaderboard
         {
             show_leaderboard();
         }
-        else if (selected_option == 12)
+        else if (selected_option == 12) // User Info
         {
             read_UserInfo();
         }
-        else if (selected_option == 13)
+        else if (selected_option == 13) // Exit
         {
             return;
         }
-        cout << "Press an arrow to back to menu..." << endl;
-        int temp;
-        temp = getch();
-        temp = getch();
+        cout << "Press an Escape or an arrow to back to menu..." << endl;
+        do
+        {
+            input_key = getch();
+        } while (input_key != 27);
     }
 }
 
@@ -184,10 +215,11 @@ void return_menu()
 int main()
 {
     srand(time(NULL));
-    return_menu();
+    show_menu();
 }
 
-void test_find_path(string map_path)
+/* Solve the maze from the map path*/
+void run_find_path(string map_path)
 {
     reset_terminal();
     int rows, columns;
@@ -198,23 +230,27 @@ void test_find_path(string map_path)
     columns = board.columns;
     vector<position> path = findPath(board, rows + columns - 2);
     position user_index;
-    show_table(board, path, user_index);
     if (path.empty())
     {
         cout << "Path does not exist!" << endl;
     }
+    else
+    {
+        show_table(board, path, user_index);
+    }
 }
 
-void test_play_game(Map map)
+/* Play game with the specified map */
+void run_play_game(Map map)
 {
     reset_terminal();
     int rows, columns;
-    string username, map_name;
+    string username;
     Board board;
     read_map(map.path, board);
     rows = board.rows;
     columns = board.columns;
-    cout << "Enter your name: ";
+    cout << "Enter your username: ";
     cin >> username;
     reset_terminal();
     vector<position> path;
@@ -230,21 +266,36 @@ void test_play_game(Map map)
     write_History(username, map.name, result, elapsedTimeInSeconds);
     write_UserInfo(username, result, elapsedTimeInSeconds);
     update_leaderboard(username, result, elapsedTimeInSeconds);
+    // Clear memory
     delete[] board.table;
 }
 
-void test_create_map()
+/* Create Easy map */
+void run_create_map()
 {
     reset_terminal();
     Board board;
+    string input;
+    // Validate Inputs
     cout << "Enter count of rows: ";
-    cin >> board.rows;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    board.rows = stoi(input);
     cout << "Enter count of columns: ";
-    cin >> board.columns;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    board.columns = stoi(input);
     string map_name;
     cout << "Enter the map name: ";
     cin >> map_name;
     reset_terminal();
+    // Create initial table
     board.table = new int *[board.rows];
     for (int i = 0; i < board.rows; i++)
     {
@@ -259,32 +310,72 @@ void test_create_map()
     position user_index;
     show_table(board, path, user_index);
     write_map(map_name, board);
+    // Clear memory
     delete[] board.table;
 }
 
-void test_hard_create_map()
+/* Create hard map */
+void run_hard_create_map()
 {
     reset_terminal();
     int path_length, max_value, min_value, max_block, min_block;
     Board board;
+    string input;
+    // Validate Inputs
     cout << "Enter count of rows: ";
-    cin >> board.rows;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    board.rows = stoi(input);
     cout << "Enter count of columns: ";
-    cin >> board.columns;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    board.columns = stoi(input);
     cout << "Enter path length: ";
-    cin >> path_length;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    path_length = stoi(input);
     cout << "Enter max value of cells: ";
-    cin >> max_value;
+    getline(cin, input);
+    if (!is_number(input, false))
+    {
+        throw 0;
+    }
+    max_value = stoi(input);
     cout << "Enter min value of cells: ";
-    cin >> min_value;
+    getline(cin, input);
+    if (!is_number(input, false))
+    {
+        throw 0;
+    }
+    min_value = stoi(input);
     cout << "Enter max block of cells: ";
-    cin >> max_block;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    max_block = stoi(input);
     cout << "Enter min block of cells: ";
-    cin >> min_block;
+    getline(cin, input);
+    if (!is_number(input, true))
+    {
+        throw 0;
+    }
+    min_block = stoi(input);
     string map_name;
     cout << "Enter the map name: ";
     cin >> map_name;
     reset_terminal();
+    // Create initial table
     board.table = new int *[board.rows];
     for (int i = 0; i < board.rows; i++)
     {
@@ -300,9 +391,35 @@ void test_hard_create_map()
     vector<position> path;
     position user_index;
     show_table(board, path, user_index);
+    // Clear memory
     delete[] board.table;
 }
 
+/* Detect the input is a number or not. also Detect the input is unsigned or not */
+bool is_number(string input, bool is_unsigned = true)
+{
+    if (input.length() == 0)
+    {
+        return false;
+    }
+    for (int i=0; i<input.length(); i++)
+    {
+        if (i == 0 && input[i] == '-')
+        {
+            if (is_unsigned)
+            {
+                return false;
+            }
+        }
+        else if (!isdigit(input[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+/* Read leaderboard data from the leaderboard file */
 vector<vector<string>> read_leaderboard()
 {
     string line;
@@ -325,19 +442,20 @@ vector<vector<string>> read_leaderboard()
     return board;
 }
 
-bool sort_leaderboard(vector<string> x, vector<string> y)
+/* Custom sort function for leaderboard data */
+bool sort_leaderboard(vector<string> user1, vector<string> user2)
 {
-    int i1, i2;
-    if (x[1] != y[1])
+    if (user1[1] != user2[1])
     {
-        return stoi(x[1]) > stoi(y[1]);
+        return stoi(user1[1]) > stoi(user2[1]); // count of wins
     }
     else
     {
-        return stoi(x[2]) <= stoi(y[2]);
+        return stoi(user1[2]) <= stoi(user2[2]); // time spent
     }
 }
 
+/* Update leaderboard data with user game status */
 void update_leaderboard(string username, bool status, int elapsed_time)
 {
     vector<vector<string>> leaderboard = read_leaderboard();
@@ -383,6 +501,7 @@ void update_leaderboard(string username, bool status, int elapsed_time)
     leaderboard_file.close();
 }
 
+/* show leaderboard data from leaderboard file */
 void show_leaderboard()
 {
     reset_terminal();
@@ -429,28 +548,28 @@ void show_leaderboard()
             total_spaces = cell_width - element_size;
             right_spaces = total_spaces / 2;
             left_spaces = total_spaces - right_spaces;
-            if (i == 0)
+            if (i == 0) // header
             {
                 cout << '|';
                 cout << string(left_spaces, ' ');
                 cout << board[i][j];
                 cout << string(right_spaces, ' ');
             }
-            else if (i == 1)
+            else if (i == 1) // first user
             {
                 cout << '|';
                 cout << color::rize(string(left_spaces, ' '), "White", "Light Yellow");
                 cout << color::rize(board[i][j], "White", "Light Yellow");
                 cout << color::rize(string(right_spaces, ' '), "White", "Light Yellow");
             }
-            else if (i == 2)
+            else if (i == 2) // second user
             {
                 cout << '|';
                 cout << color::rize(string(left_spaces, ' '), "White", "Dark Gray");
                 cout << color::rize(board[i][j], "White", "Dark Gray");
                 cout << color::rize(string(right_spaces, ' '), "White", "Dark Gray");
             }
-            else if (i == 3)
+            else if (i == 3) // third user 
             {
                 cout << '|';
                 cout << color::rize(string(left_spaces, ' '), "White", "Light Red");
@@ -471,10 +590,11 @@ void show_leaderboard()
     }
 }
 
+/* Read user info from username and the specified file */
 void read_UserInfo()
 {
     reset_terminal();
-    cout << "Enter user name: ";
+    cout << "Enter your username: ";
     string user_name;
     cin >> user_name;
     ifstream infile("./Users/" + user_name + ".txt");
@@ -494,10 +614,11 @@ void read_UserInfo()
     }
     else
     {
-        cerr << "Unable to open the file for reading." << endl;
+        cerr << color::rize("This user does not exist!", "Red") << endl;
     }
 }
 
+/* Read history from the file and show data */
 void read_History()
 {
     reset_terminal();
@@ -529,6 +650,7 @@ void read_History()
     }
 }
 
+/* Show choices for selecting from existing map */
 Map choose_existing_map()
 {
     Map map;
@@ -603,9 +725,14 @@ Map choose_existing_map()
     return map;
 }
 
+/* Read from map path and put data to board*/
 void read_map(const string &MapPath, Board &board)
 {
     ifstream inputfile(MapPath);
+    if (!inputfile.is_open())
+    {
+        throw 0;
+    }
     inputfile >> board.rows >> board.columns;
     board.table = new int *[board.rows];
     for (int i = 0; i < board.rows; i++)
@@ -621,6 +748,7 @@ void read_map(const string &MapPath, Board &board)
     }
 }
 
+/* Update the user file */
 void write_UserInfo(const string &user_name, const int &status, const int time_spent)
 {
     string filePath = "./Users/" + user_name + ".txt";
@@ -679,6 +807,7 @@ void write_UserInfo(const string &user_name, const int &status, const int time_s
     outputFile.close();
 }
 
+/* Update the history file*/
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent)
 {
     ifstream infile("./Stats/History.txt");
@@ -723,6 +852,8 @@ void write_History(const string &user_name, const string &map_name, const bool &
         cerr << "Unable to open the file for writing." << endl;
     }
 }
+
+/* Write the map in a file */
 void write_map(const string &map_name, Board board)
 {
     const int rows = board.rows;
@@ -747,6 +878,7 @@ void write_map(const string &map_name, Board board)
         cerr << "Unable to open file for writing.\n";
 }
 
+/* Show the menu */
 int start_menu()
 {
     reset_terminal();
@@ -807,6 +939,7 @@ int start_menu()
     }
 }
 
+/* Detect player can move to the position or cannot */
 bool can_move(Board board, int i, int j, vector<position> path)
 {
     if (isSafePosition(i, j, board))
@@ -833,6 +966,7 @@ bool can_move(Board board, int i, int j, vector<position> path)
     }
 }
 
+/* Play game */
 bool play_game(Board board, position &current_position, vector<position> path)
 {
     reset_terminal();
@@ -919,6 +1053,7 @@ bool play_game(Board board, position &current_position, vector<position> path)
     }
 }
 
+/* Show the table with specefic colors */
 void show_table(Board board, vector<position> path,
                 position user_index)
 {
@@ -1000,6 +1135,7 @@ void show_table(Board board, vector<position> path,
     }
 }
 
+/* Detect the position there is or not */
 bool isSafePosition(int i, int j, Board board)
 {
     if (i >= 0 && i < board.rows && j >= 0 && j < board.columns)
@@ -1007,6 +1143,7 @@ bool isSafePosition(int i, int j, Board board)
     return false;
 }
 
+/* Check existing path and save path to a vactor */
 bool isaPath(Board board, int i, int j, bool **visited,
              vector<position> &path, int path_length, int sum)
 {
@@ -1057,6 +1194,7 @@ bool isaPath(Board board, int i, int j, bool **visited,
     return false;
 }
 
+/* Find path with path length */
 vector<position> findPath(Board board, int path_length)
 {
     bool **visited = new bool *[board.rows];
@@ -1080,6 +1218,7 @@ vector<position> findPath(Board board, int path_length)
     }
 }
 
+/* Check that the number is in the list or not */
 bool isin(int list[], int number, int size)
 {
     if (size == 0)
@@ -1096,6 +1235,7 @@ bool isin(int list[], int number, int size)
     return false;
 }
 
+/* generate random number with the domain and ignored numbers */
 int generate_random(int min_value, int max_value, int *ignored_numbers, int size)
 {
     int random_number;
@@ -1109,6 +1249,7 @@ int generate_random(int min_value, int max_value, int *ignored_numbers, int size
     } while (true);
 }
 
+/* Check that the point is in the positions or not */
 bool isin_position(position positions[], position point, int size)
 {
     if (size == 0)
@@ -1125,6 +1266,7 @@ bool isin_position(position positions[], position point, int size)
     return false;
 }
 
+/* Check that the point is in the positions or not */
 bool isin_position(vector<position> positions, position point)
 {
     if (positions.size() == 0)
@@ -1141,6 +1283,7 @@ bool isin_position(vector<position> positions, position point)
     return false;
 }
 
+/* generate random position with ignored points */
 position generate_random_position(position min_position, position max_position, position *points, int size)
 {
     position point;
@@ -1155,6 +1298,7 @@ position generate_random_position(position min_position, position max_position, 
     } while (true);
 }
 
+/* Find a simple path with path length */
 bool isSimplePath(Board board, int i, int j, bool **visited,
                   vector<position> &path, int path_length)
 {
@@ -1214,7 +1358,7 @@ bool isSimplePath(Board board, int i, int j, bool **visited,
     return false;
 }
 
-/*Create a hard map*/
+/* Create a hard map */
 bool create_map(Board board, int path_length,
                 int max_value, int min_value, int max_block, int min_block)
 {
@@ -1282,6 +1426,7 @@ bool create_map(Board board, int path_length,
     int count_block = generate_random(min_block, max_block, empty_array, 0);
     position blocks[count_block + path_length + 1];
     position temp_point;
+    vector<position> zero_indexes;
     for (int i = 0; i < path_length + 1; i++)
     {
         blocks[i] = path_positions[i];
@@ -1295,7 +1440,7 @@ bool create_map(Board board, int path_length,
     for (int i = path_length + 1; i < count_block + path_length + 1; i++)
     {
         blocks[i] = generate_random_position(min_position, max_position, blocks, i);
-        board.table[blocks[i].row][blocks[i].col] = 100000000;
+        zero_indexes.push_back(blocks[i]);
     }
     // generate other numbers of table
     for (int i = 0; i < rows; i++)
@@ -1306,7 +1451,7 @@ bool create_map(Board board, int path_length,
             temp_point.col = j;
             if (!isin_position(path_positions, temp_point))
             {
-                if (board.table[i][j] != 100000000)
+                if (!isin_position(zero_indexes, temp_point))
                 {
                     board.table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
                 }
@@ -1320,7 +1465,7 @@ bool create_map(Board board, int path_length,
     return true;
 }
 
-/*Create an easy map*/
+/* Create an easy map */
 bool create_map(Board board)
 {
     // initial values
@@ -1386,6 +1531,7 @@ bool create_map(Board board)
     int count_block = generate_random(min_block, max_block, empty_array, 0);
     position blocks[count_block + path_length + 1];
     position temp_point;
+    vector<position> zero_indexes;
     for (int i = 0; i < path_length + 1; i++)
     {
         blocks[i] = path_positions[i];
@@ -1399,7 +1545,7 @@ bool create_map(Board board)
     for (int i = path_length + 1; i < count_block + path_length + 1; i++)
     {
         blocks[i] = generate_random_position(min_position, max_position, blocks, i);
-        board.table[blocks[i].row][blocks[i].col] = 1000000000;
+        zero_indexes.push_back(blocks[i]);
     }
     // generate other numbers of table
     for (int i = 0; i < board.rows; i++)
@@ -1410,7 +1556,7 @@ bool create_map(Board board)
             temp_point.col = j;
             if (!isin_position(path_positions, temp_point, path_length + 1))
             {
-                if (board.table[i][j] != 1000000000)
+                if (!isin_position(zero_indexes, temp_point))
                 {
                     board.table[i][j] = generate_random(min_value, max_value, ignored_numbers, 1);
                 }
@@ -1440,6 +1586,7 @@ int getch(void)
 }
 #endif
 
+/* Clear terminal */
 void reset_terminal()
 {
 #if defined _WIN32
