@@ -1,3 +1,13 @@
+2024-01-20 13:23:38
+User: Amirali
+Map name: map7
+Time spent: 14s
+Result: Lost
+2024-01-20 13:21:38
+User: Akbar
+Map name: map7
+Time spent: 3s
+Result: Lost
 2024-01-20 13:13:29
 User: Amirali
 Map name: map11

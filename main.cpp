@@ -438,6 +438,7 @@ vector<vector<string>> read_leaderboard()
             board[i].push_back(line);
         }
     }
+    file.close();
     return board;
 }
 
@@ -587,6 +588,7 @@ void show_leaderboard()
         }
         cout << '+' << endl;
     }
+    file.close();
 }
 
 /* Read user info from username and the specified file */
@@ -615,6 +617,7 @@ void read_UserInfo()
     {
         cerr << color::rize("This user does not exist!", "Red") << endl;
     }
+    infile.close();
 }
 
 /* Read history from the file and show data */
@@ -647,6 +650,7 @@ void read_History()
     {
         cerr << "Unable to open the file for reading." << endl;
     }
+    infile.close();
 }
 
 /* Show choices for selecting from existing map */
@@ -752,6 +756,8 @@ void read_map(const string &MapPath, Board &board)
             inputfile >> board.table[i][j];
         }
     }
+
+    inputfile.close();
 }
 
 /* Update the user file */
