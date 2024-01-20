@@ -1,3 +1,68 @@
+2024-01-19 15:06:14
+User: ali
+Map name: map1
+Time spent: 38s
+Result: Lost
+2024-01-19 15:05:13
+User: mehrgan
+Map name: map4
+Time spent: 4s
+Result: Win
+2024-01-19 15:04:45
+User: mehrgan
+Map name: map3
+Time spent: 15s
+Result: Win
+2024-01-19 15:03:49
+User: mehrgan
+Map name: map12
+Time spent: 1s
+Result: Win
+2024-01-19 15:03:13
+User: mehrgan
+Map name: map12
+Time spent: 20s
+Result: Win
+2024-01-19 15:02:06
+User: ali
+Map name: map5
+Time spent: 152s
+Result: Lost
+2024-01-19 14:57:58
+User: mehrgan
+Map name: map6
+Time spent: 60s
+Result: Lost
+2024-01-19 14:54:08
+User: mehrgan
+Map name: map7
+Time spent: 139s
+Result: Lost
+2024-01-18 20:17:04
+User: Amin
+Map name: map10
+Time spent: 9s
+Result: Lost
+2024-01-18 20:11:18
+User: Amin
+Map name: 
+Time spent: 3s
+Result: Lost
+2024-01-18 20:08:43
+User: Amin
+Map name: map1
+Time spent: 3s
+Result: Lost
+2024-01-18 20:04:03
+User: Amin
+Map name: map6
+Time spent: 5s
+Result: Lost
+2024-01-18 19:44:27
+User: Amin
+Map name: map7
+Time spent: 2s
+Result: Lost
 2024-01-17 16:23:07
 User: Amin
 Map name: map10
