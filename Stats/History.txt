@@ -73,6 +73,11 @@ User: Amin
 Map name: map4
 Time spent: 1
 Result: Win
+2024-01-14 18:14:52
+User: Amirali
+Map name: map1
+Time spent: 28
+Result: Lost
 2024-01-14 17:33:01
 User: Amin
 Map name: map4

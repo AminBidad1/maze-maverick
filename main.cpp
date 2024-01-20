@@ -63,8 +63,8 @@ struct Board
     unsigned int rows, columns;
 };
 
-
 void show_menu();
+
 void reset_terminal();
 int start_menu();
 bool create_map(Board board);
@@ -210,7 +210,6 @@ void show_menu()
         } while (input_key != 27);
     }
 }
-
 
 int main()
 {
@@ -430,10 +429,10 @@ vector<vector<string>> read_leaderboard()
     istringstream(line) >> count_user;
     vector<vector<string>> board;
     vector<string> temp;
-    for (int i=0; i<count_user; i++)
+    for (int i = 0; i < count_user; i++)
     {
         board.push_back(temp);
-        for (int j=0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
         {
             getline(file, line);
             board[i].push_back(line);
