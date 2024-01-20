@@ -133,7 +133,7 @@ void show_menu()
             {
                 run_create_map();
             }
-            catch(int)
+            catch (int)
             {
                 cerr << color::rize("You don't type a valid number!", "Red") << endl;
             }
@@ -144,7 +144,7 @@ void show_menu()
             {
                 run_hard_create_map();
             }
-            catch(int)
+            catch (int)
             {
                 cerr << color::rize("You don't type a valid number!", "Red") << endl;
             }
@@ -163,7 +163,7 @@ void show_menu()
             {
                 run_play_game(map);
             }
-            catch(...)
+            catch (...)
             {
                 cerr << color::rize("Something Wrong in map path", "Red") << endl;
             }
@@ -182,7 +182,7 @@ void show_menu()
             {
                 run_find_path(map.path);
             }
-            catch(...)
+            catch (...)
             {
                 cerr << color::rize("Something Wrong in map path", "Red") << endl;
             }
@@ -401,7 +401,7 @@ bool is_number(string input, bool is_unsigned = true)
     {
         return false;
     }
-    for (int i=0; i<input.length(); i++)
+    for (int i = 0; i < input.length(); i++)
     {
         if (i == 0 && input[i] == '-')
         {
@@ -568,7 +568,7 @@ void show_leaderboard()
                 cout << color::rize(board[i][j], "White", "Dark Gray");
                 cout << color::rize(string(right_spaces, ' '), "White", "Dark Gray");
             }
-            else if (i == 3) // third user 
+            else if (i == 3) // third user
             {
                 cout << '|';
                 cout << color::rize(string(left_spaces, ' '), "White", "Light Red");
@@ -669,6 +669,11 @@ Map choose_existing_map()
     for (int i = 0; i < NumberOfMaps; i++)
     {
         maps[i] = to_string(i + 1) + ". " + files[i];
+        size_t dotPos = maps[i].find_last_of('.');
+        if (dotPos != string::npos && dotPos > 0)
+        {
+            maps[i] = maps[i].substr(0, dotPos);
+        }
     }
 
     reset_terminal();
@@ -730,17 +735,19 @@ void read_map(const string &MapPath, Board &board)
     ifstream inputfile(MapPath);
     if (!inputfile.is_open())
     {
-        throw 0;
+        throw runtime_error("Unable to open file: " + MapPath);
     }
+
     inputfile >> board.rows >> board.columns;
     board.table = new int *[board.rows];
-    for (int i = 0; i < board.rows; i++)
+    for (unsigned int i = 0; i < board.rows; i++)
     {
         board.table[i] = new int[board.columns];
     }
-    for (int i = 0; i < board.rows; i++)
+
+    for (unsigned int i = 0; i < board.rows; i++)
     {
-        for (int j = 0; j < board.columns; j++)
+        for (unsigned int j = 0; j < board.columns; j++)
         {
             inputfile >> board.table[i][j];
         }

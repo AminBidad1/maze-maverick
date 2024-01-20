@@ -2,12 +2,12 @@
 Amin
 8
 52
+Ali
+4
+7
 mehrgan
 4
 239
-Ali
-3
-5
 Ahmad
 1
 1
@@ -19,7 +19,7 @@ kk
 2
 Amirali
 0
-28
+129
 ali
 0
 190
