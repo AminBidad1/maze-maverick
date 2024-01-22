@@ -79,6 +79,7 @@ void read_UserInfo();
 void read_History();
 void read_map(const string &MapPath, Board &board);
 Map choose_existing_map();
+void path_to_name(Map &map);
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
 void write_map(const string &map_name, Board board);
@@ -159,6 +160,7 @@ void show_menu()
             reset_terminal();
             cout << "Enter the path of map: ";
             cin >> map.path;
+            path_to_name(map);
             try
             {
                 run_play_game(map);
@@ -203,7 +205,7 @@ void show_menu()
         {
             return;
         }
-        cout << "Press an Escape or an arrow to back to menu..." << endl;
+        cout << "Press an Escape to back to menu..." << endl;
         do
         {
             input_key = getch();
@@ -616,6 +618,7 @@ void read_UserInfo()
     else
     {
         cerr << color::rize("This user does not exist!", "Red") << endl;
+        return;
     }
     infile.close();
 }
@@ -648,7 +651,8 @@ void read_History()
     }
     else
     {
-        cerr << "Unable to open the file for reading." << endl;
+        cerr << color::rize("Unable to open the file for reading!", "Red") << endl;
+        return;
     }
     infile.close();
 }
@@ -760,6 +764,26 @@ void read_map(const string &MapPath, Board &board)
     inputfile.close();
 }
 
+/* find file name */
+void path_to_name(Map &map)
+{
+    size_t lastBackslashIndex = map.path.find_last_of('\\');
+    if (lastBackslashIndex != string::npos)
+    {
+        string map_with_suffix = map.path.substr(lastBackslashIndex + 1);
+        size_t dotPos = map_with_suffix.find_last_of('.');
+        if (dotPos != string::npos && dotPos > 0)
+        {
+            map.name = map_with_suffix.substr(0, dotPos);
+        }
+    }
+    else
+    {
+        cerr << color::rize("Backslash not found in the path!", "Red") << endl;
+        return;
+    }
+}
+
 /* Update the user file */
 void write_UserInfo(const string &user_name, const int &status, const int time_spent)
 {
@@ -826,7 +850,7 @@ void write_History(const string &user_name, const string &map_name, const bool &
 
     if (!infile)
     {
-        cerr << "Unable to open the file for reading." << endl;
+        cerr << color::rize("Unable to open the file for reading.", "Red") << endl;
         return;
     }
 
@@ -861,7 +885,7 @@ void write_History(const string &user_name, const string &map_name, const bool &
     }
     else
     {
-        cerr << "Unable to open the file for writing." << endl;
+        cerr << color::rize("Unable to open the file for writing!", "Red") << endl;
     }
 }
 
@@ -887,7 +911,10 @@ void write_map(const string &map_name, Board board)
         outfile.close();
     }
     else
-        cerr << "Unable to open file for writing.\n";
+    {
+        cerr << color::rize("Unable to open file for writing!", "Red") << endl;
+        return;
+    }
 }
 
 /* Show the menu */

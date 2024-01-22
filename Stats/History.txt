@@ -1,3 +1,13 @@
+2024-01-22 14:18:28
+User: Amirali
+Map name: testmap
+Time spent: 4s
+Result: Lost
+2024-01-22 14:12:53
+User: Amir
+Map name: testmap.txt
+Time spent: 5s
+Result: Lost
 2024-01-20 13:23:38
 User: Amirali
 Map name: map7
