@@ -79,6 +79,7 @@ void read_UserInfo();
 void read_History();
 void read_map(const string &MapPath, Board &board);
 Map choose_existing_map();
+void path_to_name(Map &map);
 void write_UserInfo(const string &user_name, const int &status, const int time_spent);
 void write_History(const string &user_name, const string &map_name, const bool &result, const int &time_spent);
 void write_map(const string &map_name, Board board);
@@ -133,7 +134,7 @@ void show_menu()
             {
                 run_create_map();
             }
-            catch(int)
+            catch (int)
             {
                 cerr << color::rize("You don't type a valid number!", "Red") << endl;
             }
@@ -144,7 +145,7 @@ void show_menu()
             {
                 run_hard_create_map();
             }
-            catch(int)
+            catch (int)
             {
                 cerr << color::rize("You don't type a valid number!", "Red") << endl;
             }
@@ -159,11 +160,12 @@ void show_menu()
             reset_terminal();
             cout << "Enter the path of map: ";
             cin >> map.path;
+            path_to_name(map);
             try
             {
                 run_play_game(map);
             }
-            catch(...)
+            catch (...)
             {
                 cerr << color::rize("Something Wrong in map path", "Red") << endl;
             }
@@ -182,7 +184,7 @@ void show_menu()
             {
                 run_find_path(map.path);
             }
-            catch(...)
+            catch (...)
             {
                 cerr << color::rize("Something Wrong in map path", "Red") << endl;
             }
@@ -203,7 +205,7 @@ void show_menu()
         {
             return;
         }
-        cout << "Press an Escape or an arrow to back to menu..." << endl;
+        cout << "Press an Escape to back to menu..." << endl;
         do
         {
             input_key = getch();
@@ -401,7 +403,7 @@ bool is_number(string input, bool is_unsigned = true)
     {
         return false;
     }
-    for (int i=0; i<input.length(); i++)
+    for (int i = 0; i < input.length(); i++)
     {
         if (i == 0 && input[i] == '-')
         {
@@ -438,6 +440,7 @@ vector<vector<string>> read_leaderboard()
             board[i].push_back(line);
         }
     }
+    file.close();
     return board;
 }
 
@@ -568,7 +571,7 @@ void show_leaderboard()
                 cout << color::rize(board[i][j], "White", "Dark Gray");
                 cout << color::rize(string(right_spaces, ' '), "White", "Dark Gray");
             }
-            else if (i == 3) // third user 
+            else if (i == 3) // third user
             {
                 cout << '|';
                 cout << color::rize(string(left_spaces, ' '), "White", "Light Red");
@@ -587,6 +590,7 @@ void show_leaderboard()
         }
         cout << '+' << endl;
     }
+    file.close();
 }
 
 /* Read user info from username and the specified file */
@@ -614,7 +618,9 @@ void read_UserInfo()
     else
     {
         cerr << color::rize("This user does not exist!", "Red") << endl;
+        return;
     }
+    infile.close();
 }
 
 /* Read history from the file and show data */
@@ -645,8 +651,10 @@ void read_History()
     }
     else
     {
-        cerr << "Unable to open the file for reading." << endl;
+        cerr << color::rize("Unable to open the file for reading!", "Red") << endl;
+        return;
     }
+    infile.close();
 }
 
 /* Show choices for selecting from existing map */
@@ -669,6 +677,11 @@ Map choose_existing_map()
     for (int i = 0; i < NumberOfMaps; i++)
     {
         maps[i] = to_string(i + 1) + ". " + files[i];
+        size_t dotPos = maps[i].find_last_of('.');
+        if (dotPos != string::npos && dotPos > 0)
+        {
+            maps[i] = maps[i].substr(0, dotPos);
+        }
     }
 
     reset_terminal();
@@ -730,20 +743,44 @@ void read_map(const string &MapPath, Board &board)
     ifstream inputfile(MapPath);
     if (!inputfile.is_open())
     {
-        throw 0;
+        throw runtime_error("Unable to open file: " + MapPath);
     }
+
     inputfile >> board.rows >> board.columns;
     board.table = new int *[board.rows];
-    for (int i = 0; i < board.rows; i++)
+    for (unsigned int i = 0; i < board.rows; i++)
     {
         board.table[i] = new int[board.columns];
     }
-    for (int i = 0; i < board.rows; i++)
+
+    for (unsigned int i = 0; i < board.rows; i++)
     {
-        for (int j = 0; j < board.columns; j++)
+        for (unsigned int j = 0; j < board.columns; j++)
         {
             inputfile >> board.table[i][j];
         }
+    }
+
+    inputfile.close();
+}
+
+/* find file name */
+void path_to_name(Map &map)
+{
+    size_t lastBackslashIndex = map.path.find_last_of('\\');
+    if (lastBackslashIndex != string::npos)
+    {
+        string map_with_suffix = map.path.substr(lastBackslashIndex + 1);
+        size_t dotPos = map_with_suffix.find_last_of('.');
+        if (dotPos != string::npos && dotPos > 0)
+        {
+            map.name = map_with_suffix.substr(0, dotPos);
+        }
+    }
+    else
+    {
+        cerr << color::rize("Backslash not found in the path!", "Red") << endl;
+        return;
     }
 }
 
@@ -813,7 +850,7 @@ void write_History(const string &user_name, const string &map_name, const bool &
 
     if (!infile)
     {
-        cerr << "Unable to open the file for reading." << endl;
+        cerr << color::rize("Unable to open the file for reading.", "Red") << endl;
         return;
     }
 
@@ -848,7 +885,7 @@ void write_History(const string &user_name, const string &map_name, const bool &
     }
     else
     {
-        cerr << "Unable to open the file for writing." << endl;
+        cerr << color::rize("Unable to open the file for writing!", "Red") << endl;
     }
 }
 
@@ -874,7 +911,10 @@ void write_map(const string &map_name, Board board)
         outfile.close();
     }
     else
-        cerr << "Unable to open file for writing.\n";
+    {
+        cerr << color::rize("Unable to open file for writing!", "Red") << endl;
+        return;
+    }
 }
 
 /* Show the menu */
